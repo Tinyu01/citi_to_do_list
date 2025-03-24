@@ -1,463 +1,411 @@
+// ======================
+// TASK MANAGER APPLICATION
+// ======================
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Core Elements
-  const newTaskInput = document.getElementById('new-task');
-  const addTaskBtn = document.getElementById('add-task');
-  const emptyAddTaskBtn = document.getElementById('empty-add-task');
-  const tasksList = document.getElementById('tasks-list');
-  const todoList = document.getElementById('todo-list');
-  const inProgressList = document.getElementById('in-progress-list');
-  const completedList = document.getElementById('completed-list');
-  const emptyState = document.getElementById('empty-state');
+  // ======================
+  // DOM ELEMENTS
+  // ======================
+  const elements = {
+    // Task Input Elements
+    newTaskInput: document.getElementById('new-task'),
+    addTaskBtn: document.getElementById('add-task'),
+    emptyAddTaskBtn: document.getElementById('empty-add-task'),
+    dueDateInput: document.getElementById('due-date'),
+    taskCategorySelect: document.getElementById('task-category'),
+    priorityDots: document.querySelectorAll('.priority-selector .priority-dot'),
 
-  // Modal Elements
-  const taskDetailsModal = document.getElementById('task-details-modal');
-  const settingsModal = document.getElementById('settings-modal');
-  const closeModalBtns = document.querySelectorAll('.close-modal');
-  const settingsBtn = document.getElementById('settings-btn');
+    // Task List Containers
+    tasksList: document.getElementById('tasks-list'),
+    todoList: document.getElementById('todo-list'),
+    inProgressList: document.getElementById('in-progress-list'),
+    completedList: document.getElementById('completed-list'),
+    emptyState: document.getElementById('empty-state'),
 
-  // Form Elements
-  const dueDateInput = document.getElementById('due-date');
-  const taskCategorySelect = document.getElementById('task-category');
-  const priorityDots = document.querySelectorAll('.priority-selector .priority-dot');
+    // Modal Elements
+    taskDetailsModal: document.getElementById('task-details-modal'),
+    settingsModal: document.getElementById('settings-modal'),
+    closeModalBtns: document.querySelectorAll('.close-modal'),
+    settingsBtn: document.getElementById('settings-btn'),
 
-  // State Management
-  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  let selectedPriority = 'low';
-  let currentEditTask = null;
+    // Modal Form Elements
+    editTaskTitle: document.getElementById('edit-task-title'),
+    editDueDate: document.getElementById('edit-due-date'),
+    editTaskCategory: document.getElementById('edit-task-category'),
+    saveTaskBtn: document.getElementById('save-task-btn'),
+    deleteTaskBtn: document.getElementById('delete-task-btn'),
 
-  // Utility Functions
-  function saveTasksToLocalStorage() {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-    updateTaskStats();
-  }
+    // Theme Elements
+    themeSelect: document.getElementById('theme-select'),
+    settingsThemePreference: document.getElementById('theme-preference'),
 
-  function updateTaskStats() {
-    const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(task => task.completed).length;
-    const pendingTasks = totalTasks - completedTasks;
-    const productivityScore = totalTasks > 0 
-      ? Math.round((completedTasks / totalTasks) * 100) 
-      : 0;
+    // Stats Elements
+    totalTasks: document.getElementById('total-tasks'),
+    completedTasks: document.getElementById('completed-tasks'),
+    pendingTasks: document.getElementById('pending-tasks'),
+    productivityScore: document.getElementById('productivity-score'),
 
-    document.getElementById('total-tasks').textContent = totalTasks;
-    document.getElementById('completed-tasks').textContent = completedTasks;
-    document.getElementById('pending-tasks').textContent = pendingTasks;
-    document.getElementById('productivity-score').textContent = `${productivityScore}%`;
-  }
+    // Footer Elements
+    currentYear: document.getElementById('current-year'),
+    footerLinks: document.querySelectorAll('.footer-links a')
+  };
 
-  function createTaskElement(task) {
-    const taskItem = document.createElement('li');
-    taskItem.className = `task-item priority-${task.priority} ${task.completed ? 'completed' : ''}`;
-    taskItem.dataset.id = task.id;
-    taskItem.innerHTML = `
-      <div class="task-checkbox">
-        <input type="checkbox" ${task.completed ? 'checked' : ''}>
-      </div>
-      <div class="task-content">
-        <div class="task-title">${task.text}</div>
-        <div class="task-meta">
-          <span class="task-category ${task.category}">${task.category || 'No Category'}</span>
-          <span class="task-date">${task.dueDate || 'No Due Date'}</span>
+  // ======================
+  // APPLICATION STATE
+  // ======================
+  const state = {
+    tasks: JSON.parse(localStorage.getItem('tasks')) || [],
+    selectedPriority: 'low',
+    currentEditTask: null
+  };
+
+  // ======================
+  // UTILITY FUNCTIONS
+  // ======================
+  const utils = {
+    saveTasksToLocalStorage() {
+      localStorage.setItem('tasks', JSON.stringify(state.tasks));
+      this.updateTaskStats();
+    },
+
+    updateTaskStats() {
+      const totalTasks = state.tasks.length;
+      const completedTasks = state.tasks.filter(task => task.completed).length;
+      const pendingTasks = totalTasks - completedTasks;
+      const productivityScore = totalTasks > 0 
+        ? Math.round((completedTasks / totalTasks) * 100) 
+        : 0;
+
+      elements.totalTasks.textContent = totalTasks;
+      elements.completedTasks.textContent = completedTasks;
+      elements.pendingTasks.textContent = pendingTasks;
+      elements.productivityScore.textContent = `${productivityScore}%`;
+    },
+
+    createTaskElement(task) {
+      const taskItem = document.createElement('li');
+      taskItem.className = `task-item priority-${task.priority} ${task.completed ? 'completed' : ''}`;
+      taskItem.dataset.id = task.id;
+      taskItem.innerHTML = `
+        <div class="task-checkbox">
+          <input type="checkbox" ${task.completed ? 'checked' : ''}>
         </div>
-      </div>
-      <div class="task-actions">
-        <button class="edit-task-btn"><i class="fas fa-edit"></i></button>
-        <button class="delete-task-btn"><i class="fas fa-trash"></i></button>
-      </div>
-    `;
+        <div class="task-content">
+          <div class="task-title">${task.text}</div>
+          <div class="task-meta">
+            <span class="task-category ${task.category}">${task.category || 'No Category'}</span>
+            <span class="task-date">${task.dueDate || 'No Due Date'}</span>
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="edit-task-btn"><i class="fas fa-edit"></i></button>
+          <button class="delete-task-btn"><i class="fas fa-trash"></i></button>
+        </div>
+      `;
 
-    // Checkbox Event
-    const checkbox = taskItem.querySelector('.task-checkbox input');
-    checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
+      // Add event listeners to the task element
+      const checkbox = taskItem.querySelector('.task-checkbox input');
+      checkbox.addEventListener('change', () => taskManager.toggleTaskCompletion(task.id));
 
-    // Edit Button Event
-    const editBtn = taskItem.querySelector('.edit-task-btn');
-    editBtn.addEventListener('click', () => openTaskDetailsModal(task));
+      const editBtn = taskItem.querySelector('.edit-task-btn');
+      editBtn.addEventListener('click', () => modals.openTaskDetailsModal(task));
 
-    // Delete Button Event
-    const deleteBtn = taskItem.querySelector('.delete-task-btn');
-    deleteBtn.addEventListener('click', () => deleteTask(task.id));
+      const deleteBtn = taskItem.querySelector('.delete-task-btn');
+      deleteBtn.addEventListener('click', () => taskManager.deleteTask(task.id));
 
-    return taskItem;
-  }
-
-  function renderTasks() {
-    // Clear existing lists
-    [tasksList, todoList, inProgressList, completedList].forEach(list => list.innerHTML = '');
-
-    if (tasks.length === 0) {
-      emptyState.style.display = 'flex';
-      return;
+      return taskItem;
     }
+  };
 
-    emptyState.style.display = 'none';
+  // ======================
+  // TASK MANAGEMENT
+  // ======================
+  const taskManager = {
+    renderTasks() {
+      // Clear existing lists
+      [elements.tasksList, elements.todoList, elements.inProgressList, elements.completedList]
+        .forEach(list => list.innerHTML = '');
 
-    tasks.forEach(task => {
-      const taskElement = createTaskElement(task);
-      
-      // Render in multiple views
-      tasksList.appendChild(taskElement.cloneNode(true));
-      
-      if (task.completed) {
-        completedList.appendChild(taskElement.cloneNode(true));
-      } else {
-        todoList.appendChild(taskElement.cloneNode(true));
+      if (state.tasks.length === 0) {
+        elements.emptyState.style.display = 'flex';
+        return;
       }
-    });
-  }
 
-  function addTask() {
-    const taskText = newTaskInput.value.trim();
-    if (!taskText) return;
+      elements.emptyState.style.display = 'none';
 
-    const newTask = {
-      id: Date.now(),
-      text: taskText,
-      completed: false,
-      category: taskCategorySelect.value !== 'none' ? taskCategorySelect.value : null,
-      dueDate: dueDateInput.value || null,
-      priority: selectedPriority,
-      createdAt: new Date().toISOString()
-    };
+      state.tasks.forEach(task => {
+        const taskElement = utils.createTaskElement(task);
+        
+        // Render in multiple views
+        elements.tasksList.appendChild(taskElement.cloneNode(true));
+        
+        if (task.completed) {
+          elements.completedList.appendChild(taskElement.cloneNode(true));
+        } else {
+          elements.todoList.appendChild(taskElement.cloneNode(true));
+        }
+      });
+    },
 
-    tasks.unshift(newTask);
-    saveTasksToLocalStorage();
-    renderTasks();
+    addTask() {
+      const taskText = elements.newTaskInput.value.trim();
+      if (!taskText) return;
 
-    // Reset form
-    newTaskInput.value = '';
-    taskCategorySelect.value = 'none';
-    dueDateInput.value = '';
-    document.querySelector('.priority-dot.active').classList.remove('active');
-    document.querySelector('.priority-dot[data-priority="low"]').classList.add('active');
-    selectedPriority = 'low';
-  }
-
-  function toggleTaskCompletion(taskId) {
-    tasks = tasks.map(task => 
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    );
-    saveTasksToLocalStorage();
-    renderTasks();
-  }
-
-  function deleteTask(taskId) {
-    if (!confirm('Are you sure you want to delete this task?')) return;
-    
-    tasks = tasks.filter(task => task.id !== taskId);
-    saveTasksToLocalStorage();
-    renderTasks();
-  }
-
-  function openTaskDetailsModal(task) {
-    currentEditTask = task;
-    document.getElementById('edit-task-title').value = task.text;
-    document.getElementById('edit-due-date').value = task.dueDate || '';
-    document.getElementById('edit-task-category').value = task.category || 'none';
-    
-    // Reset priority dots
-    document.querySelectorAll('#task-details-modal .priority-dot').forEach(dot => {
-      dot.classList.remove('active');
-      if (dot.dataset.priority === task.priority) {
-        dot.classList.add('active');
-      }
-    });
-
-    taskDetailsModal.style.display = 'flex';
-  }
-
-  // Event Listeners
-  addTaskBtn.addEventListener('click', addTask);
-  emptyAddTaskBtn.addEventListener('click', addTask);
-  newTaskInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addTask();
-  });
-
-  // Priority Selector
-  priorityDots.forEach(dot => {
-    dot.addEventListener('click', () => {
-      priorityDots.forEach(d => d.classList.remove('active'));
-      dot.classList.add('active');
-      selectedPriority = dot.dataset.priority;
-    });
-  });
-
-  // Modal Close Buttons
-  closeModalBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      taskDetailsModal.style.display = 'none';
-      settingsModal.style.display = 'none';
-    });
-  });
-
-  // Settings Modal
-  settingsBtn.addEventListener('click', () => {
-    settingsModal.style.display = 'flex';
-  });
-
-  // Task Details Modal Save
-  document.getElementById('save-task-btn').addEventListener('click', () => {
-    if (currentEditTask) {
-      const updatedTask = {
-        ...currentEditTask,
-        text: document.getElementById('edit-task-title').value,
-        dueDate: document.getElementById('edit-due-date').value,
-        category: document.getElementById('edit-task-category').value,
-        priority: document.querySelector('#task-details-modal .priority-dot.active').dataset.priority
+      const newTask = {
+        id: Date.now(),
+        text: taskText,
+        completed: false,
+        category: elements.taskCategorySelect.value !== 'none' ? elements.taskCategorySelect.value : null,
+        dueDate: elements.dueDateInput.value || null,
+        priority: state.selectedPriority,
+        createdAt: new Date().toISOString()
       };
 
-      tasks = tasks.map(task => 
-        task.id === currentEditTask.id ? updatedTask : task
+      state.tasks.unshift(newTask);
+      utils.saveTasksToLocalStorage();
+      this.renderTasks();
+
+      // Reset form
+      elements.newTaskInput.value = '';
+      elements.taskCategorySelect.value = 'none';
+      elements.dueDateInput.value = '';
+      document.querySelector('.priority-dot.active').classList.remove('active');
+      document.querySelector('.priority-dot[data-priority="low"]').classList.add('active');
+      state.selectedPriority = 'low';
+    },
+
+    toggleTaskCompletion(taskId) {
+      state.tasks = state.tasks.map(task => 
+        task.id === taskId ? { ...task, completed: !task.completed } : task
       );
+      utils.saveTasksToLocalStorage();
+      this.renderTasks();
+    },
 
-      saveTasksToLocalStorage();
-      renderTasks();
-      taskDetailsModal.style.display = 'none';
-      currentEditTask = null;
-    }
-  });
-
-  // Delete Task in Modal
-  document.getElementById('delete-task-btn').addEventListener('click', () => {
-    if (currentEditTask) {
-      deleteTask(currentEditTask.id);
-      taskDetailsModal.style.display = 'none';
-    }
-  });
-
-  // Initial Setup
-  renderTasks();
-  updateTaskStats();
-
-  // Set default due date to today
-  dueDateInput.valueAsDate = new Date();
-});
-
-// content of index.js
-document.addEventListener('DOMContentLoaded', function () {
-  const themeSelect = document.getElementById('theme-select');
-  const body = document.body;
-
-  // Function to set the theme
-  function setTheme(theme) {
-    body.className = ''; // Reset all theme classes
-    body.classList.add(`theme-${theme}`);
-    localStorage.setItem('theme', theme);
-  }
-
-  // Load saved theme from localStorage
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  setTheme(savedTheme);
-  themeSelect.value = savedTheme;
-
-  // Event listener for theme change
-  themeSelect.addEventListener('change', function () {
-    setTheme(this.value);
-  });
-
-  // Additional theme-related functionality can be added here
-});
-
-// Function to apply theme to the modal
-function applyThemeToModal(theme) {
-  const modal = document.getElementById('task-details-modal');
-  modal.classList.remove('theme-dark', 'theme-sunset', 'theme-forest', 'theme-ocean');
-  if (theme !== 'light') {
-    modal.classList.add(`theme-${theme}`);
-  }
-}
-
-// Event listener for theme change
-document.getElementById('theme-select').addEventListener('change', function() {
-  const selectedTheme = this.value;
-  applyThemeToModal(selectedTheme);
-});
-
-// Function to open the modal
-function openTaskDetailsModal() {
-  const modal = document.getElementById('task-details-modal');
-  modal.style.display = 'flex';
-  applyThemeToModal(document.getElementById('theme-select').value);
-}
-
-// Function to close the modal
-function closeTaskDetailsModal() {
-  const modal = document.getElementById('task-details-modal');
-  modal.style.display = 'none';
-}
-
-// Event listeners for opening and closing the modal
-document.querySelectorAll('.task-item').forEach(item => {
-  item.addEventListener('click', openTaskDetailsModal);
-});
-
-document.querySelector('.close-modal').addEventListener('click', closeTaskDetailsModal);
-document.querySelector('.modal').addEventListener('click', function(event) {
-  if (event.target === this) {
-    closeTaskDetailsModal();
-  }
-});
-
-// Function to apply the selected theme
-function applyTheme(theme) {
-  document.documentElement.className = ''; // Reset all theme classes
-  document.documentElement.classList.add(`theme-${theme}`);
-  localStorage.setItem('theme', theme);
-}
-
-// Function to initialize the theme from localStorage
-function initializeTheme() {
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  applyTheme(savedTheme);
-  document.getElementById('theme-preference').value = savedTheme;
-}
-
-// Event listener for theme selection
-document.getElementById('theme-preference').addEventListener('change', (e) => {
-  applyTheme(e.target.value);
-});
-
-// Initialize theme on page load
-initializeTheme();
-
-// Modal open/close functionality
-const modal = document.getElementById('settings-modal');
-const openModalBtn = document.getElementById('settings-btn');
-const closeModalBtn = document.querySelector('.close-modal');
-
-openModalBtn.addEventListener('click', () => {
-  modal.style.display = 'flex';
-  setTimeout(() => {
-    modal.querySelector('.modal-content').classList.add('active');
-  }, 10);
-});
-
-closeModalBtn.addEventListener('click', () => {
-  modal.querySelector('.modal-content').classList.remove('active');
-  setTimeout(() => {
-    modal.style.display = 'none';
-  }, 300);
-});
-
-// Close modal when clicking outside
-window.addEventListener('click', (e) => {
-  if (e.target === modal) {
-    modal.querySelector('.modal-content').classList.remove('active');
-    setTimeout(() => {
-      modal.style.display = 'none';
-    }, 300);
-  }
-});
-
-/* Fooeter Script */
-document.addEventListener('DOMContentLoaded', function() {
-  // Set current year
-  document.getElementById('current-year').textContent = new Date().getFullYear();
-  
-  // Theme switcher
-  const themeSelect = document.getElementById('theme-select');
-  const settingsThemePreference = document.getElementById('theme-preference');
-  
-  // Function to update theme
-  function updateTheme(theme) {
-    document.body.className = '';
-    document.body.classList.add(`theme-${theme}`);
-    
-    // Update footer appearance based on theme
-    const footer = document.querySelector('footer');
-    
-    // Apply theme-specific gradient animations
-    switch(theme) {
-      case 'dark':
-        footer.style.setProperty('--footer-accent', 'var(--dark-accent)');
-        break;
-      case 'sunset':
-        footer.style.setProperty('--footer-accent', 'var(--sunset-accent)');
-        break;
-      case 'forest':
-        footer.style.setProperty('--footer-accent', 'var(--forest-accent)');
-        break;
-      case 'ocean':
-        footer.style.setProperty('--footer-accent', 'var(--ocean-accent)');
-        break;
-      default:
-        footer.style.setProperty('--footer-accent', 'var(--light-accent)');
-    }
-    
-    // Save theme preference
-    localStorage.setItem('theme', theme);
-  }
-  
-  // Apply theme from localStorage
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  updateTheme(savedTheme);
-  
-  // Update select elements to match saved theme
-  if (themeSelect) {
-    themeSelect.value = savedTheme;
-  }
-  
-  if (settingsThemePreference) {
-    settingsThemePreference.value = savedTheme;
-  }
-  
-  // Listen for theme changes
-  if (themeSelect) {
-    themeSelect.addEventListener('change', function() {
-      updateTheme(this.value);
+    deleteTask(taskId) {
+      if (!confirm('Are you sure you want to delete this task?')) return;
       
-      // Update settings theme preference to match
-      if (settingsThemePreference) {
-        settingsThemePreference.value = this.value;
-      }
-    });
-  }
-  
-  // Listen for theme changes from settings
-  if (settingsThemePreference) {
-    settingsThemePreference.addEventListener('change', function() {
-      updateTheme(this.value);
+      state.tasks = state.tasks.filter(task => task.id !== taskId);
+      utils.saveTasksToLocalStorage();
+      this.renderTasks();
+    },
+
+    updateTask(updatedTask) {
+      state.tasks = state.tasks.map(task => 
+        task.id === updatedTask.id ? updatedTask : task
+      );
+      utils.saveTasksToLocalStorage();
+      this.renderTasks();
+    }
+  };
+
+  // ======================
+  // MODAL MANAGEMENT
+  // ======================
+  const modals = {
+    openTaskDetailsModal(task) {
+      state.currentEditTask = task;
+      elements.editTaskTitle.value = task.text;
+      elements.editDueDate.value = task.dueDate || '';
+      elements.editTaskCategory.value = task.category || 'none';
       
-      // Update header theme selector to match
-      if (themeSelect) {
-        themeSelect.value = this.value;
-      }
-    });
-  }
-  
-  // Apply smooth scroll to footer links
-  document.querySelectorAll('.footer-links a').forEach(link => {
-    link.addEventListener('click', function(e) {
-      // Only apply if the href points to a section on the page
-      const href = this.getAttribute('href');
-      if (href.startsWith('#') && href.length > 1) {
-        e.preventDefault();
-        const targetId = href.substring(1);
-        const targetElement = document.getElementById(targetId);
-        
-        if (targetElement) {
-          targetElement.scrollIntoView({
-            behavior: 'smooth'
-          });
+      // Reset priority dots
+      document.querySelectorAll('#task-details-modal .priority-dot').forEach(dot => {
+        dot.classList.remove('active');
+        if (dot.dataset.priority === task.priority) {
+          dot.classList.add('active');
         }
+      });
+
+      elements.taskDetailsModal.style.display = 'flex';
+      themeManager.applyThemeToModal(themeManager.getCurrentTheme());
+    },
+
+    closeModal(modal) {
+      modal.querySelector('.modal-content')?.classList.remove('active');
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 300);
+    },
+
+    saveTaskChanges() {
+      if (state.currentEditTask) {
+        const updatedTask = {
+          ...state.currentEditTask,
+          text: elements.editTaskTitle.value,
+          dueDate: elements.editDueDate.value,
+          category: elements.editTaskCategory.value,
+          priority: document.querySelector('#task-details-modal .priority-dot.active').dataset.priority
+        };
+
+        taskManager.updateTask(updatedTask);
+        elements.taskDetailsModal.style.display = 'none';
+        state.currentEditTask = null;
+      }
+    }
+  };
+
+  // ======================
+  // THEME MANAGEMENT
+  // ======================
+  const themeManager = {
+    getCurrentTheme() {
+      return localStorage.getItem('theme') || 'light';
+    },
+
+    updateTheme(theme) {
+      document.body.className = '';
+      document.body.classList.add(`theme-${theme}`);
+      
+      // Update footer appearance
+      const footer = document.querySelector('footer');
+      const accentMap = {
+        dark: 'var(--dark-accent)',
+        sunset: 'var(--sunset-accent)',
+        forest: 'var(--forest-accent)',
+        ocean: 'var(--ocean-accent)',
+        light: 'var(--light-accent)'
+      };
+      
+      footer.style.setProperty('--footer-accent', accentMap[theme] || accentMap.light);
+      localStorage.setItem('theme', theme);
+    },
+
+    applyThemeToModal(theme) {
+      elements.taskDetailsModal.classList.remove(
+        'theme-dark', 'theme-sunset', 'theme-forest', 'theme-ocean'
+      );
+      if (theme !== 'light') {
+        elements.taskDetailsModal.classList.add(`theme-${theme}`);
+      }
+    },
+
+    initializeTheme() {
+      const savedTheme = this.getCurrentTheme();
+      this.updateTheme(savedTheme);
+      
+      if (elements.themeSelect) elements.themeSelect.value = savedTheme;
+      if (elements.settingsThemePreference) elements.settingsThemePreference.value = savedTheme;
+    }
+  };
+
+  // ======================
+  // FOOTER MANAGEMENT
+  // ======================
+  const footerManager = {
+    init() {
+      // Set current year
+      elements.currentYear.textContent = new Date().getFullYear();
+      
+      // Apply smooth scroll to footer links
+      elements.footerLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          const href = this.getAttribute('href');
+          if (href.startsWith('#') && href.length > 1) {
+            e.preventDefault();
+            const targetElement = document.getElementById(href.substring(1));
+            targetElement?.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      });
+      
+      // Add subtle animation to footer on scroll
+      window.addEventListener('scroll', this.handleFooterScroll);
+    },
+
+    handleFooterScroll() {
+      const footer = document.querySelector('footer');
+      const footerPosition = footer.getBoundingClientRect().top;
+      const windowHeight = window.innerHeight;
+      
+      if (footerPosition < windowHeight) {
+        const scrollProgress = (windowHeight - footerPosition) / windowHeight;
+        const clampedProgress = Math.min(scrollProgress, 1);
+        
+        footer.style.transform = `translateY(${(1 - clampedProgress) * 10}px)`;
+        footer.style.opacity = 0.5 + (0.5 * clampedProgress);
+      }
+    }
+  };
+
+  // ======================
+  // EVENT LISTENERS
+  // ======================
+  const setupEventListeners = () => {
+    // Task Management
+    elements.addTaskBtn.addEventListener('click', () => taskManager.addTask());
+    elements.emptyAddTaskBtn.addEventListener('click', () => taskManager.addTask());
+    elements.newTaskInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') taskManager.addTask();
+    });
+
+    // Priority Selector
+    elements.priorityDots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        elements.priorityDots.forEach(d => d.classList.remove('active'));
+        dot.classList.add('active');
+        state.selectedPriority = dot.dataset.priority;
+      });
+    });
+
+    // Modal Close Buttons
+    elements.closeModalBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modals.closeModal(elements.taskDetailsModal);
+        modals.closeModal(elements.settingsModal);
+      });
+    });
+
+    // Settings Modal
+    elements.settingsBtn.addEventListener('click', () => {
+      elements.settingsModal.style.display = 'flex';
+      setTimeout(() => {
+        elements.settingsModal.querySelector('.modal-content').classList.add('active');
+      }, 10);
+    });
+
+    // Task Details Modal Actions
+    elements.saveTaskBtn.addEventListener('click', () => modals.saveTaskChanges());
+    elements.deleteTaskBtn.addEventListener('click', () => {
+      if (state.currentEditTask) {
+        taskManager.deleteTask(state.currentEditTask.id);
+        elements.taskDetailsModal.style.display = 'none';
       }
     });
-  });
-  
-  // Add subtle animation to footer on scroll
-  window.addEventListener('scroll', function() {
-    const footer = document.querySelector('footer');
-    const footerPosition = footer.getBoundingClientRect().top;
-    const windowHeight = window.innerHeight;
-    
-    if (footerPosition < windowHeight) {
-      // Footer is in view
-      const scrollProgress = (windowHeight - footerPosition) / windowHeight;
-      const clampedProgress = Math.min(scrollProgress, 1);
-      
-      // Apply subtle animation
-      footer.style.transform = `translateY(${(1 - clampedProgress) * 10}px)`;
-      footer.style.opacity = 0.5 + (0.5 * clampedProgress);
+
+    // Theme Change Handlers
+    if (elements.themeSelect) {
+      elements.themeSelect.addEventListener('change', function() {
+        themeManager.updateTheme(this.value);
+        if (elements.settingsThemePreference) elements.settingsThemePreference.value = this.value;
+      });
     }
-  });
+
+    if (elements.settingsThemePreference) {
+      elements.settingsThemePreference.addEventListener('change', function() {
+        themeManager.updateTheme(this.value);
+        if (elements.themeSelect) elements.themeSelect.value = this.value;
+      });
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (e) => {
+      if (e.target === elements.taskDetailsModal) modals.closeModal(elements.taskDetailsModal);
+      if (e.target === elements.settingsModal) modals.closeModal(elements.settingsModal);
+    });
+  };
+
+  // ======================
+  // INITIALIZATION
+  // ======================
+  const init = () => {
+    themeManager.initializeTheme();
+    taskManager.renderTasks();
+    utils.updateTaskStats();
+    elements.dueDateInput.valueAsDate = new Date();
+    footerManager.init();
+    setupEventListeners();
+  };
+
+  init();
 });
