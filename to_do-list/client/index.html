@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
   <div class="app-container">
     <header>
@@ -35,7 +37,7 @@
         </button>
       </div>
     </header>
-    
+
     <div class="dashboard">
       <div class="stats-banner">
         <div class="stat-item">
@@ -55,7 +57,7 @@
           <p>Productivity</p>
         </div>
       </div>
-      
+
       <div class="chart-container">
         <canvas id="task-completion-chart"></canvas>
         <div class="chart-controls">
@@ -64,7 +66,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="main-content">
       <div class="sidebar">
         <div class="sidebar-section">
@@ -75,7 +77,7 @@
             <li><i class="fas fa-calendar"></i> Calendar</li>
           </ul>
         </div>
-        
+
         <div class="sidebar-section">
           <h3>Categories</h3>
           <ul class="category-list" id="category-list">
@@ -100,7 +102,7 @@
             <i class="fas fa-plus"></i> New Category
           </button>
         </div>
-        
+
         <div class="sidebar-section">
           <h3>Focus Mode</h3>
           <div class="focus-controls">
@@ -118,7 +120,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="content-area">
         <div class="top-actions">
           <div class="search-container">
@@ -128,7 +130,7 @@
               <i class="fas fa-microphone"></i>
             </button>
           </div>
-          
+
           <div class="filter-container">
             <button class="filter-btn active" data-filter="all">All</button>
             <button class="filter-btn" data-filter="pending">Pending</button>
@@ -136,7 +138,7 @@
             <button class="filter-btn" data-filter="priority">Priority</button>
             <button class="filter-btn" data-filter="today">Today</button>
           </div>
-          
+
           <div class="sort-container">
             <label for="sort-by">Sort by:</label>
             <select id="sort-select">
@@ -147,13 +149,13 @@
             </select>
           </div>
         </div>
-        
+
         <div class="view-container">
           <!-- List View -->
           <div class="list-view active-view">
             <ul id="tasks-list" class="tasks-list"></ul>
           </div>
-          
+
           <!-- Kanban View -->
           <div class="kanban-view">
             <div class="kanban-column" data-status="todo">
@@ -169,7 +171,7 @@
               <ul class="kanban-list" id="completed-list"></ul>
             </div>
           </div>
-          
+
           <!-- Calendar View -->
           <div class="calendar-view">
             <div class="calendar-header">
@@ -179,7 +181,7 @@
             </div>
             <div class="calendar-grid" id="calendar-grid"></div>
           </div>
-          
+
           <div class="empty-state" id="empty-state">
             <img src="/api/placeholder/300/200" alt="No tasks" class="empty-image">
             <p>No tasks found. Add a new task to get started!</p>
@@ -188,7 +190,7 @@
             </button>
           </div>
         </div>
-        
+
         <div class="add-task-container">
           <input type="text" id="new-task" placeholder="Add a new task">
           <div class="task-details">
@@ -216,9 +218,10 @@
             <span>Add Task</span>
           </button>
         </div>
+        
       </div>
     </div>
-    
+
     <!-- Task Details: Modal -->
     <div class="modal" id="task-details-modal">
       <div class="modal-content">
@@ -275,183 +278,186 @@
         </div>
       </div>
     </div>
-    
-   <!-- Settings Modal -->
-<div class="modal" id="settings-modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Settings</h2>
-      <button class="close-modal">&times;</button>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-section">
+            <h3>Appearance</h3>
+            <div class="form-group">
+              <label>Theme</label>
+              <div class="theme-selector-container">
+                <div class="theme-option" data-theme="light">
+                  <div class="theme-preview theme-light">
+                    <div class="theme-preview-header"></div>
+                    <div class="theme-preview-body">
+                      <div class="theme-preview-sidebar"></div>
+                      <div class="theme-preview-content">
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                      </div>
+                    </div>
+                    <div class="theme-name">Light</div>
+                  </div>
+                </div>
+                <div class="theme-option" data-theme="dark">
+                  <div class="theme-preview theme-dark">
+                    <div class="theme-preview-header"></div>
+                    <div class="theme-preview-body">
+                      <div class="theme-preview-sidebar"></div>
+                      <div class="theme-preview-content">
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                      </div>
+                    </div>
+                    <div class="theme-name">Dark</div>
+                  </div>
+                </div>
+                <div class="theme-option" data-theme="sunset">
+                  <div class="theme-preview theme-sunset">
+                    <div class="theme-preview-header"></div>
+                    <div class="theme-preview-body">
+                      <div class="theme-preview-sidebar"></div>
+                      <div class="theme-preview-content">
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                      </div>
+                    </div>
+                    <div class="theme-name">Sunset</div>
+                  </div>
+                </div>
+                <div class="theme-option" data-theme="forest">
+                  <div class="theme-preview theme-forest">
+                    <div class="theme-preview-header"></div>
+                    <div class="theme-preview-body">
+                      <div class="theme-preview-sidebar"></div>
+                      <div class="theme-preview-content">
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                      </div>
+                    </div>
+                    <div class="theme-name">Forest</div>
+                  </div>
+                </div>
+                <div class="theme-option" data-theme="ocean">
+                  <div class="theme-preview theme-ocean">
+                    <div class="theme-preview-header"></div>
+                    <div class="theme-preview-body">
+                      <div class="theme-preview-sidebar"></div>
+                      <div class="theme-preview-content">
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                      </div>
+                    </div>
+                    <div class="theme-name">Ocean</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="font-size">Font Size</label>
+              <div class="slider-container">
+                <input type="range" id="font-size" class="slider" min="12" max="20" value="16">
+                <span class="slider-value" id="font-size-value">16px</span>
+              </div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>Notifications</h3>
+            <div class="form-group">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="enable-notifications">
+                <label for="enable-notifications">Enable Notifications</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="enable-sound">
+                <label for="enable-sound">Sound Alerts</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="enable-reminders">
+                <label for="enable-reminders">Task Reminders</label>
+              </div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>Productivity</h3>
+            <div class="form-group">
+              <label for="pomodoro-duration">Pomodoro Duration</label>
+              <div class="slider-container">
+                <input type="range" id="pomodoro-duration" class="slider" min="5" max="60" value="25">
+                <span class="slider-value" id="pomodoro-duration-value">25 min</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="break-duration">Break Duration</label>
+              <div class="slider-container">
+                <input type="range" id="break-duration" class="slider" min="1" max="30" value="5">
+                <span class="slider-value" id="break-duration-value">5 min</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="auto-break">
+                <label for="auto-break">Auto-start Breaks</label>
+              </div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>Data Management</h3>
+            <div class="form-group button-group">
+              <button class="secondary-btn" id="export-data">
+                <i class="fas fa-download"></i> Export Data
+              </button>
+              <button class="secondary-btn" id="import-data">
+                <i class="fas fa-upload"></i> Import Data
+              </button>
+            </div>
+            <div class="form-group">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="auto-save">
+                <label for="auto-save">Auto-save Changes</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <button class="danger-btn" id="clear-data">
+                <i class="fas fa-trash-alt"></i> Clear All Data
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="save-settings" id="save-settings-btn">Save Settings</button>
+        </div>
+      </div>
     </div>
-    <div class="modal-body">
-      <div class="settings-section">
-        <h3>Appearance</h3>
-        <div class="form-group">
-          <label>Theme</label>
-          <div class="theme-selector-container">
-            <div class="theme-option" data-theme="light">
-              <div class="theme-preview theme-light">
-                <div class="theme-preview-header"></div>
-                <div class="theme-preview-body">
-                  <div class="theme-preview-sidebar"></div>
-                  <div class="theme-preview-content">
-                    <div class="theme-preview-item"></div>
-                    <div class="theme-preview-item"></div>
-                    <div class="theme-preview-item"></div>
-                  </div>
-                </div>
-                <div class="theme-name">Light</div>
-              </div>
-            </div>
-            <div class="theme-option" data-theme="dark">
-              <div class="theme-preview theme-dark">
-                <div class="theme-preview-header"></div>
-                <div class="theme-preview-body">
-                  <div class="theme-preview-sidebar"></div>
-                  <div class="theme-preview-content">
-                    <div class="theme-preview-item"></div>
-                    <div class="theme-preview-item"></div>
-                    <div class="theme-preview-item"></div>
-                  </div>
-                </div>
-                <div class="theme-name">Dark</div>
-              </div>
-            </div>
-            <div class="theme-option" data-theme="sunset">
-              <div class="theme-preview theme-sunset">
-                <div class="theme-preview-header"></div>
-                <div class="theme-preview-body">
-                  <div class="theme-preview-sidebar"></div>
-                  <div class="theme-preview-content">
-                    <div class="theme-preview-item"></div>
-                    <div class="theme-preview-item"></div>
-                    <div class="theme-preview-item"></div>
-                  </div>
-                </div>
-                <div class="theme-name">Sunset</div>
-              </div>
-            </div>
-            <div class="theme-option" data-theme="forest">
-              <div class="theme-preview theme-forest">
-                <div class="theme-preview-header"></div>
-                <div class="theme-preview-body">
-                  <div class="theme-preview-sidebar"></div>
-                  <div class="theme-preview-content">
-                    <div class="theme-preview-item"></div>
-                    <div class="theme-preview-item"></div>
-                    <div class="theme-preview-item"></div>
-                  </div>
-                </div>
-                <div class="theme-name">Forest</div>
-              </div>
-            </div>
-            <div class="theme-option" data-theme="ocean">
-              <div class="theme-preview theme-ocean">
-                <div class="theme-preview-header"></div>
-                <div class="theme-preview-body">
-                  <div class="theme-preview-sidebar"></div>
-                  <div class="theme-preview-content">
-                    <div class="theme-preview-item"></div>
-                    <div class="theme-preview-item"></div>
-                    <div class="theme-preview-item"></div>
-                  </div>
-                </div>
-                <div class="theme-name">Ocean</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="font-size">Font Size</label>
-          <div class="slider-container">
-            <input type="range" id="font-size" class="slider" min="12" max="20" value="16">
-            <span class="slider-value" id="font-size-value">16px</span>
-          </div>
-        </div>
-      </div>
-      <div class="settings-section">
-        <h3>Notifications</h3>
-        <div class="form-group">
-          <div class="checkbox-wrapper">
-            <input type="checkbox" id="enable-notifications">
-            <label for="enable-notifications">Enable Notifications</label>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="checkbox-wrapper">
-            <input type="checkbox" id="enable-sound">
-            <label for="enable-sound">Sound Alerts</label>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="checkbox-wrapper">
-            <input type="checkbox" id="enable-reminders">
-            <label for="enable-reminders">Task Reminders</label>
-          </div>
-        </div>
-      </div>
-      <div class="settings-section">
-        <h3>Productivity</h3>
-        <div class="form-group">
-          <label for="pomodoro-duration">Pomodoro Duration</label>
-          <div class="slider-container">
-            <input type="range" id="pomodoro-duration" class="slider" min="5" max="60" value="25">
-            <span class="slider-value" id="pomodoro-duration-value">25 min</span>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="break-duration">Break Duration</label>
-          <div class="slider-container">
-            <input type="range" id="break-duration" class="slider" min="1" max="30" value="5">
-            <span class="slider-value" id="break-duration-value">5 min</span>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="checkbox-wrapper">
-            <input type="checkbox" id="auto-break">
-            <label for="auto-break">Auto-start Breaks</label>
-          </div>
-        </div>
-      </div>
-      <div class="settings-section">
-        <h3>Data Management</h3>
-        <div class="form-group button-group">
-          <button class="secondary-btn" id="export-data">
-            <i class="fas fa-download"></i> Export Data
-          </button>
-          <button class="secondary-btn" id="import-data">
-            <i class="fas fa-upload"></i> Import Data
-          </button>
-        </div>
-        <div class="form-group">
-          <div class="checkbox-wrapper">
-            <input type="checkbox" id="auto-save">
-            <label for="auto-save">Auto-save Changes</label>
-          </div>
-        </div>
-        <div class="form-group">
-          <button class="danger-btn" id="clear-data">
-            <i class="fas fa-trash-alt"></i> Clear All Data
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="save-settings" id="save-settings-btn">Save Settings</button>
-    </div>
-  </div>
-</div>
 
   </div>
-  
+
   <footer>
     <div class="footer-wave">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
-        <path fill="rgba(255,255,255,0.1)" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,202.7C1248,213,1344,171,1392,149.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        <path fill="rgba(255,255,255,0.1)"
+          d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,202.7C1248,213,1344,171,1392,149.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
+        </path>
       </svg>
     </div>
     <div class="footer-container">
-      <p>TaskFlow &copy; <span id="current-year"></span> | Designed by <a>MASINGITA OTTIS MALULEKE</a> with <i class="fas fa-heart"></i></p>
+      <p>TaskFlow &copy; <span id="current-year"></span> | Designed by <a>MASINGITA OTTIS MALULEKE</a> with <i
+          class="fas fa-heart"></i></p>
       <div class="footer-links">
         <a href="#">About</a>
         <a href="#">Privacy Policy</a>
@@ -471,4 +477,5 @@
   <script src="script.js"></script>
   <script src="charts.js"></script>
 </body>
+
 </html>

@@ -227,3 +227,238 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Core Elements
+  const newTaskInput = document.getElementById('new-task');
+  const addTaskBtn = document.getElementById('add-task');
+  const emptyAddTaskBtn = document.getElementById('empty-add-task');
+  const tasksList = document.getElementById('tasks-list');
+  const todoList = document.getElementById('todo-list');
+  const inProgressList = document.getElementById('in-progress-list');
+  const completedList = document.getElementById('completed-list');
+  const emptyState = document.getElementById('empty-state');
+
+  // Modal Elements
+  const taskDetailsModal = document.getElementById('task-details-modal');
+  const settingsModal = document.getElementById('settings-modal');
+  const closeModalBtns = document.querySelectorAll('.close-modal');
+  const settingsBtn = document.getElementById('settings-btn');
+
+  // Form Elements
+  const dueDateInput = document.getElementById('due-date');
+  const taskCategorySelect = document.getElementById('task-category');
+  const priorityDots = document.querySelectorAll('.priority-selector .priority-dot');
+
+  // State Management
+  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  let selectedPriority = 'low';
+  let currentEditTask = null;
+
+  // Utility Functions
+  function saveTasksToLocalStorage() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    updateTaskStats();
+  }
+
+  function updateTaskStats() {
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(task => task.completed).length;
+    const pendingTasks = totalTasks - completedTasks;
+    const productivityScore = totalTasks > 0 
+      ? Math.round((completedTasks / totalTasks) * 100) 
+      : 0;
+
+    document.getElementById('total-tasks').textContent = totalTasks;
+    document.getElementById('completed-tasks').textContent = completedTasks;
+    document.getElementById('pending-tasks').textContent = pendingTasks;
+    document.getElementById('productivity-score').textContent = `${productivityScore}%`;
+  }
+
+  function createTaskElement(task) {
+    const taskItem = document.createElement('li');
+    taskItem.className = `task-item priority-${task.priority} ${task.completed ? 'completed' : ''}`;
+    taskItem.dataset.id = task.id;
+    taskItem.innerHTML = `
+      <div class="task-checkbox">
+        <input type="checkbox" ${task.completed ? 'checked' : ''}>
+      </div>
+      <div class="task-content">
+        <div class="task-title">${task.text}</div>
+        <div class="task-meta">
+          <span class="task-category ${task.category}">${task.category || 'No Category'}</span>
+          <span class="task-date">${task.dueDate || 'No Due Date'}</span>
+        </div>
+      </div>
+      <div class="task-actions">
+        <button class="edit-task-btn"><i class="fas fa-edit"></i></button>
+        <button class="delete-task-btn"><i class="fas fa-trash"></i></button>
+      </div>
+    `;
+
+    // Checkbox Event
+    const checkbox = taskItem.querySelector('.task-checkbox input');
+    checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
+
+    // Edit Button Event
+    const editBtn = taskItem.querySelector('.edit-task-btn');
+    editBtn.addEventListener('click', () => openTaskDetailsModal(task));
+
+    // Delete Button Event
+    const deleteBtn = taskItem.querySelector('.delete-task-btn');
+    deleteBtn.addEventListener('click', () => deleteTask(task.id));
+
+    return taskItem;
+  }
+
+  function renderTasks() {
+    // Clear existing lists
+    [tasksList, todoList, inProgressList, completedList].forEach(list => list.innerHTML = '');
+
+    if (tasks.length === 0) {
+      emptyState.style.display = 'flex';
+      return;
+    }
+
+    emptyState.style.display = 'none';
+
+    tasks.forEach(task => {
+      const taskElement = createTaskElement(task);
+      
+      // Render in multiple views
+      tasksList.appendChild(taskElement.cloneNode(true));
+      
+      if (task.completed) {
+        completedList.appendChild(taskElement.cloneNode(true));
+      } else {
+        todoList.appendChild(taskElement.cloneNode(true));
+      }
+    });
+  }
+
+  function addTask() {
+    const taskText = newTaskInput.value.trim();
+    if (!taskText) return;
+
+    const newTask = {
+      id: Date.now(),
+      text: taskText,
+      completed: false,
+      category: taskCategorySelect.value !== 'none' ? taskCategorySelect.value : null,
+      dueDate: dueDateInput.value || null,
+      priority: selectedPriority,
+      createdAt: new Date().toISOString()
+    };
+
+    tasks.unshift(newTask);
+    saveTasksToLocalStorage();
+    renderTasks();
+
+    // Reset form
+    newTaskInput.value = '';
+    taskCategorySelect.value = 'none';
+    dueDateInput.value = '';
+    document.querySelector('.priority-dot.active').classList.remove('active');
+    document.querySelector('.priority-dot[data-priority="low"]').classList.add('active');
+    selectedPriority = 'low';
+  }
+
+  function toggleTaskCompletion(taskId) {
+    tasks = tasks.map(task => 
+      task.id === taskId ? { ...task, completed: !task.completed } : task
+    );
+    saveTasksToLocalStorage();
+    renderTasks();
+  }
+
+  function deleteTask(taskId) {
+    if (!confirm('Are you sure you want to delete this task?')) return;
+    
+    tasks = tasks.filter(task => task.id !== taskId);
+    saveTasksToLocalStorage();
+    renderTasks();
+  }
+
+  function openTaskDetailsModal(task) {
+    currentEditTask = task;
+    document.getElementById('edit-task-title').value = task.text;
+    document.getElementById('edit-due-date').value = task.dueDate || '';
+    document.getElementById('edit-task-category').value = task.category || 'none';
+    
+    // Reset priority dots
+    document.querySelectorAll('#task-details-modal .priority-dot').forEach(dot => {
+      dot.classList.remove('active');
+      if (dot.dataset.priority === task.priority) {
+        dot.classList.add('active');
+      }
+    });
+
+    taskDetailsModal.style.display = 'flex';
+  }
+
+  // Event Listeners
+  addTaskBtn.addEventListener('click', addTask);
+  emptyAddTaskBtn.addEventListener('click', addTask);
+  newTaskInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  // Priority Selector
+  priorityDots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      priorityDots.forEach(d => d.classList.remove('active'));
+      dot.classList.add('active');
+      selectedPriority = dot.dataset.priority;
+    });
+  });
+
+  // Modal Close Buttons
+  closeModalBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      taskDetailsModal.style.display = 'none';
+      settingsModal.style.display = 'none';
+    });
+  });
+
+  // Settings Modal
+  settingsBtn.addEventListener('click', () => {
+    settingsModal.style.display = 'flex';
+  });
+
+  // Task Details Modal Save
+  document.getElementById('save-task-btn').addEventListener('click', () => {
+    if (currentEditTask) {
+      const updatedTask = {
+        ...currentEditTask,
+        text: document.getElementById('edit-task-title').value,
+        dueDate: document.getElementById('edit-due-date').value,
+        category: document.getElementById('edit-task-category').value,
+        priority: document.querySelector('#task-details-modal .priority-dot.active').dataset.priority
+      };
+
+      tasks = tasks.map(task => 
+        task.id === currentEditTask.id ? updatedTask : task
+      );
+
+      saveTasksToLocalStorage();
+      renderTasks();
+      taskDetailsModal.style.display = 'none';
+      currentEditTask = null;
+    }
+  });
+
+  // Delete Task in Modal
+  document.getElementById('delete-task-btn').addEventListener('click', () => {
+    if (currentEditTask) {
+      deleteTask(currentEditTask.id);
+      taskDetailsModal.style.display = 'none';
+    }
+  });
+
+  // Initial Setup
+  renderTasks();
+  updateTaskStats();
+
+  // Set default due date to today
+  dueDateInput.valueAsDate = new Date();
+});
