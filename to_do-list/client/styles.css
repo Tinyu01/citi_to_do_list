@@ -964,42 +964,75 @@ header {
 
 .add-task-container {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+  flex-direction: column;
+  gap: var(--spacing-md);
   background-color: var(--card-bg);
-  padding: var(--spacing-sm);
-  border-radius: var(--border-radius-sm);
-  box-shadow: var(--shadow-sm);
-  margin-top: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
   transition: background-color var(--transition-normal);
+  margin-top: var(--spacing-lg);
 }
 
 .add-task-container input {
   flex: 1;
-  border: none;
-  background-color: transparent;
+  border: 1px solid var(--border);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--bg);
   color: var(--text);
+  font-size: 1rem;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.add-task-container input:focus {
+  border-color: var(--accent);
   outline: none;
 }
 
 .task-details {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
 }
 
 .due-date-selector, .category-selector, .priority-selector {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+  flex: 1;
+}
+
+.due-date-selector i, .category-selector i {
+  color: var(--text-secondary);
+}
+
+.due-date-selector input, .category-selector select {
+  flex: 1;
+  border: 1px solid var(--border);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--bg);
+  color: var(--text);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.due-date-selector input:focus, .category-selector select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.priority-selector {
+  display: flex;
+  gap: var(--spacing-sm);
 }
 
 .priority-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 80%;
   cursor: pointer;
-  transition: transform var(--transition-fast);
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
 }
 
 .priority-dot:hover {
@@ -1020,6 +1053,25 @@ header {
 
 .priority-dot.active {
   border: 2px solid var(--text);
+}
+
+#add-task {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  transition: opacity var(--transition-fast);
+  width: 100%;
+}
+
+#add-task:hover {
+  opacity: 0.9;
 }
 
 /* Responsive Design */
@@ -1345,7 +1397,7 @@ header {
 }
 
 .form-group {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var (--spacing-md);
 }
 
 .form-group label {
@@ -1486,7 +1538,6 @@ header {
   }
 }
 
-
 /* Enhanced Footer Styles */
 footer {
   margin-top: var(--spacing-xl);
@@ -1499,7 +1550,6 @@ footer {
   position: relative;
   overflow: hidden;
 }
-
 /* Animated gradient background */
 footer::before {
   content: '';
