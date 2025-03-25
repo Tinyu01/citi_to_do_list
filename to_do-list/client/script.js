@@ -47,7 +47,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Footer Elements
     currentYear: document.getElementById('current-year'),
-    footerLinks: document.querySelectorAll('.footer-links a')
+    footerLinks: document.querySelectorAll('.footer-links a'),
+
+    // Kanban View Elements
+    kanbanViewBtn: document.getElementById('kanban-view-btn'),
+    kanbanView: document.querySelector('.kanban-view'),
+
+    // List View Elements
+    listViewBtn: document.getElementById('list-view-btn'),
+    listView: document.querySelector('.list-view'),
+
+    // Calendar View Elements
+    calendarViewBtn: document.getElementById('calender-view-btn'),
+    calendarView: document.querySelector('.calendar-view')
   };
 
   // ======================
@@ -392,6 +404,38 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('click', (e) => {
       if (e.target === elements.taskDetailsModal) modals.closeModal(elements.taskDetailsModal);
       if (e.target === elements.settingsModal) modals.closeModal(elements.settingsModal);
+    });
+
+    // Kanban View Button
+    elements.kanbanViewBtn.addEventListener('click', () => {
+      elements.kanbanView.style.display = 'block';
+    });
+
+    // List View Button
+    elements.listViewBtn.addEventListener('click', () => {
+      elements.listView.style.display = 'block';
+    });
+
+    // Calendar View Button
+    elements.calendarViewBtn.addEventListener('click', () => {
+      elements.calendarView.style.display = 'block';
+    });
+
+    const viewButtons = [elements.listViewBtn, elements.kanbanViewBtn, elements.calendarViewBtn];
+    const views = [elements.listView, elements.kanbanView, elements.calendarView];
+
+    viewButtons.forEach((btn, index) => {
+      btn.addEventListener('click', () => {
+        viewButtons.forEach((b, i) => {
+          if (i === index) {
+            b.classList.add('active');
+            views[i].style.display = 'block';
+          } else {
+            b.classList.remove('active');
+            views[i].style.display = 'none';
+          }
+        });
+      });
     });
   };
 

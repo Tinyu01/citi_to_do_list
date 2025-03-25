@@ -74,9 +74,9 @@
         <div class="sidebar-section">
           <h3>Views</h3>
           <ul class="sidebar-menu">
-            <li class="active"><i class="fas fa-list"></i> List View</li>
-            <li><i class="fas fa-columns"></i> Kanban Board</li>
-            <li><i class="fas fa-calendar"></i> Calendar</li>
+            <li id="list-view-btn"class="active"><i class="fas fa-list"></i> List View</li>
+            <li id="kanban-view-btn"><i class="fas fa-columns"></i> Kanban Board</li>
+            <li id="calender-view-btn"><i class="fas fa-calendar"></i> Calendar</li>
           </ul>
         </div>
 
@@ -105,7 +105,7 @@
           </button>
         </div>
 
-        <div class="sidebar-section">
+        <!-- <div class="sidebar-section">
           <h3>Focus Mode</h3>
           <div class="focus-controls">
             <div class="pomodoro-timer">
@@ -120,7 +120,8 @@
               <i class="fas fa-lightbulb"></i> Enter Focus Mode
             </button>
           </div>
-        </div>
+        </div> -->
+      
       </div>
 
       <div class="content-area">
@@ -154,12 +155,12 @@
 
         <div class="view-container">
           <!-- List View -->
-          <div class="list-view active-view">
+          <div id="list-view" class="list-view">
             <ul id="tasks-list" class="tasks-list"></ul>
           </div>
 
           <!-- Kanban View -->
-          <div class="kanban-view">
+          <div id="kanban-view" class="kanban-view" style="display: none;">
             <div class="kanban-column" data-status="todo">
               <h3>To Do</h3>
               <ul class="kanban-list" id="todo-list"></ul>
@@ -175,7 +176,7 @@
           </div>
 
           <!-- Calendar View -->
-          <div class="calendar-view">
+          <div id="calendar-view" class="calendar-view" style="display: none;">
             <div class="calendar-header">
               <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
               <h3 id="calendar-title">March 2025</h3>
