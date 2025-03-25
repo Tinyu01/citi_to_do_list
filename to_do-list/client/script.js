@@ -137,13 +137,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskElement = utils.createTaskElement(task);
         
         // Render in multiple views
-        elements.tasksList.appendChild(taskElement.cloneNode(true));
+        elements.tasksList.appendChild(taskElement);
         
         if (task.completed) {
           elements.completedList.appendChild(taskElement.cloneNode(true));
         } else {
           elements.todoList.appendChild(taskElement.cloneNode(true));
         }
+      });
+
+      // Reattach event listeners for cloned elements
+      document.querySelectorAll('.task-item').forEach(item => {
+        const taskId = item.dataset.id;
+        const checkbox = item.querySelector('.task-checkbox input');
+        const editBtn = item.querySelector('.edit-task-btn');
+        const deleteBtn = item.querySelector('.delete-task-btn');
+
+        checkbox.addEventListener('change', () => taskManager.toggleTaskCompletion(taskId));
+        editBtn.addEventListener('click', () => {
+          const task = state.tasks.find(t => t.id == taskId);
+          modals.openTaskDetailsModal(task);
+        });
+        deleteBtn.addEventListener('click', () => taskManager.deleteTask(taskId));
       });
     },
 
