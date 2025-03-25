@@ -62,6 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
     calendarView: document.querySelector('.calendar-view')
   };
 
+  // Ensure list view is shown by default
+  elements.listViewBtn.classList.add('active');
+  elements.listView.style.display = 'block';
+
   // ======================
   // APPLICATION STATE
   // ======================
