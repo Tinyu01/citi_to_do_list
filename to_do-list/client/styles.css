@@ -713,6 +713,10 @@
     border-color: var(--accent);
     outline: none;
   }
+
+  #new-task {
+    width: 100%;
+  }
   
   .task-details {
     display: flex;
