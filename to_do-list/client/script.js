@@ -88,8 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const totalTasks = state.tasks.length;
       const completedTasks = state.tasks.filter(task => task.completed).length;
       const pendingTasks = totalTasks - completedTasks;
-      const productivityScore = totalTasks > 0 
-        ? Math.round((completedTasks / totalTasks) * 100) 
+      const productivityScore = totalTasks > 0
+        ? Math.round((completedTasks / totalTasks) * 100)
         : 0;
 
       elements.totalTasks.textContent = totalTasks;
@@ -133,6 +133,155 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // Category Management Button Interaction
+  document.addEventListener('DOMContentLoaded', () => {
+    const addCategoryBtn = document.getElementById('add-category');
+
+    // Prevent multiple click event listeners
+    addCategoryBtn.removeEventListener('click', addCategoryHandler);
+    addCategoryBtn.addEventListener('click', addCategoryHandler);
+
+    // Add hover and active states for better UX
+    addCategoryBtn.addEventListener('mouseenter', () => {
+      addCategoryBtn.style.transform = 'scale(1.05)';
+      addCategoryBtn.style.opacity = '0.9';
+    });
+
+    addCategoryBtn.addEventListener('mouseleave', () => {
+      addCategoryBtn.style.transform = 'scale(1)';
+      addCategoryBtn.style.opacity = '1';
+    });
+
+    // Ensure button is not disabled
+    addCategoryBtn.disabled = false;
+  });
+
+  // Category addition handler
+  function addCategoryHandler() {
+    // Temporary disable button to prevent multiple clicks
+    const addCategoryBtn = document.getElementById('add-category');
+    addCategoryBtn.disabled = true;
+
+    // Show modal for better user experience
+    const categoryModal = createCategoryModal();
+    document.body.appendChild(categoryModal);
+
+    // Focus on input for immediate interaction
+    const categoryInput = categoryModal.querySelector('#new-category-input');
+    categoryInput.focus();
+  }
+
+  // Create a modal for adding categories
+  function createCategoryModal() {
+    const modal = document.createElement('div');
+    modal.innerHTML = `
+      <div class="category-modal" style="
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+      ">
+          <div class="category-modal-content" style="
+              background: white;
+              padding: 20px;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+              width: 300px;
+          ">
+              <h2 style="margin-bottom: 15px;">Add New Category</h2>
+              <input 
+                  type="text" 
+                  id="new-category-input" 
+                  placeholder="Enter category name" 
+                  style="
+                      width: 100%;
+                      padding: 10px;
+                      margin-bottom: 15px;
+                      border: 1px solid #ddd;
+                      border-radius: 4px;
+                  "
+              >
+              <div style="display: flex; justify-content: space-between;">
+                  <button id="cancel-category" style="
+                      background-color: #f3f4f6;
+                      color: #374151;
+                      border: none;
+                      padding: 10px 15px;
+                      border-radius: 4px;
+                      cursor: pointer;
+                  ">Cancel</button>
+                  <button id="confirm-category" style="
+                      background-color: #3b82f6;
+                      color: white;
+                      border: none;
+                      padding: 10px 15px;
+                      border-radius: 4px;
+                      cursor: pointer;
+                  ">Add Category</button>
+              </div>
+          </div>
+      </div>
+  `;
+
+    // Cancel button
+    const cancelBtn = modal.querySelector('#cancel-category');
+    cancelBtn.addEventListener('click', () => {
+      document.body.removeChild(modal);
+      document.getElementById('add-category').disabled = false;
+    });
+
+    // Confirm button
+    const confirmBtn = modal.querySelector('#confirm-category');
+    confirmBtn.addEventListener('click', () => {
+      const categoryInput = modal.querySelector('#new-category-input');
+      const categoryName = categoryInput.value.trim();
+
+      // Check if category name is provided
+      if (!categoryName) {
+        showNotification('Category name cannot be empty', 'error');
+        return;
+      }
+
+      // Check if category already exists
+      if (categoryExists(categoryName)) {
+        showNotification(`Category "${categoryName}" already exists`, 'error');
+        return;
+      }
+
+      // Add the new category
+      const categoryData = {
+        name: categoryName,
+        color: categoryColors[Math.floor(Math.random() * categoryColors.length)]
+      };
+      addCategoryToUI(categoryData);
+
+      // Show success notification
+      showNotification(`Category "${categoryName}" added successfully`);
+
+      // Remove modal and re-enable button
+      document.body.removeChild(modal);
+      document.getElementById('add-category').disabled = false;
+    });
+
+    // Allow Enter key to submit
+    const categoryInput = modal.querySelector('#new-category-input');
+    categoryInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        confirmBtn.click();
+      }
+    });
+
+    return modal;
+  }
+
+  // Existing helper functions (categoryExists, showNotification, etc.) remain the same as in previous implementation
+
   // ======================
   // TASK MANAGEMENT
   // ======================
@@ -151,10 +300,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       state.tasks.forEach(task => {
         const taskElement = utils.createTaskElement(task);
-        
+
         // Render in multiple views
         elements.tasksList.appendChild(taskElement);
-        
+
         if (task.completed) {
           elements.completedList.appendChild(taskElement.cloneNode(true));
         } else {
@@ -191,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     toggleTaskCompletion(taskId) {
-      state.tasks = state.tasks.map(task => 
+      state.tasks = state.tasks.map(task =>
         task.id === taskId ? { ...task, completed: !task.completed } : task
       );
       utils.saveTasksToLocalStorage();
@@ -200,18 +349,206 @@ document.addEventListener('DOMContentLoaded', () => {
 
     deleteTask(taskId) {
       if (!confirm('Are you sure you want to delete this task?')) return;
-      
+
       state.tasks = state.tasks.filter(task => task.id !== taskId);
       utils.saveTasksToLocalStorage();
       this.renderTasks();
     },
 
     updateTask(updatedTask) {
-      state.tasks = state.tasks.map(task => 
+      state.tasks = state.tasks.map(task =>
         task.id === updatedTask.id ? updatedTask : task
       );
       utils.saveTasksToLocalStorage();
       this.renderTasks();
+    }
+  };
+
+  // ======================
+  // CATEGORY MANAGEMENT
+  // ======================
+  const categoryManager = {
+    init() {
+      this.addCategoryBtn = document.getElementById('add-category');
+      this.categoryList = document.getElementById('category-list');
+      this.taskCategorySelect = document.getElementById('task-category');
+      this.editTaskCategorySelect = document.getElementById('edit-task-category');
+
+      // Predefined color palette
+      this.categoryColors = [
+        '#6366f1', '#f59e0b', '#10b981', '#ef4444',
+        '#8b5cf6', '#ec4899', '#14b8a6', '#f97316',
+        '#0ea5e9', '#84cc16'
+      ];
+
+      this.defaultCategories = ['all', 'work', 'personal', 'health'];
+      this.setupEventListeners();
+    },
+
+    setupEventListeners() {
+      this.addCategoryBtn.addEventListener('click', () => this.showAddCategoryModal());
+    },
+
+    showAddCategoryModal() {
+      // Create modal elements
+      const modalOverlay = document.createElement('div');
+      modalOverlay.className = 'category-modal-overlay';
+
+      modalOverlay.innerHTML = `
+      <div class="category-modal">
+        <div class="modal-header">
+          <h3>Add New Category</h3>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="new-category-input" placeholder="Enter category name">
+          <div class="error-message" id="category-error"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="secondary-btn" id="cancel-category">Cancel</button>
+          <button class="primary-btn" id="confirm-category">Add Category</button>
+        </div>
+      </div>
+    `;
+
+      document.body.appendChild(modalOverlay);
+
+      // Get DOM references
+      const input = modalOverlay.querySelector('#new-category-input');
+      const errorElement = modalOverlay.querySelector('#category-error');
+      const confirmBtn = modalOverlay.querySelector('#confirm-category');
+      const cancelBtn = modalOverlay.querySelector('#cancel-category');
+      const closeBtn = modalOverlay.querySelector('.close-modal');
+
+      // Focus input field immediately
+      input.focus();
+
+      // Clear any previous errors
+      errorElement.textContent = '';
+
+      // Event handler for adding category
+      const handleAddCategory = () => {
+        const categoryName = input.value.trim();
+
+        // Validate input
+        if (!categoryName) {
+          this.showError(errorElement, 'Please enter a category name');
+          return;
+        }
+
+        if (categoryName.length > 20) {
+          this.showError(errorElement, 'Category name too long (max 20 chars)');
+          return;
+        }
+
+        const categorySlug = categoryName.toLowerCase().replace(/\s+/g, '-');
+
+        if (this.categoryExists(categorySlug)) {
+          this.showError(errorElement, 'This category already exists');
+          return;
+        }
+
+        // Add the category
+        this.addCategory(categorySlug, categoryName);
+
+        // Close the modal
+        document.body.removeChild(modalOverlay);
+      };
+
+      // Set up event listeners
+      confirmBtn.addEventListener('click', handleAddCategory);
+
+      cancelBtn.addEventListener('click', () => {
+        document.body.removeChild(modalOverlay);
+      });
+
+      closeBtn.addEventListener('click', () => {
+        document.body.removeChild(modalOverlay);
+      });
+
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleAddCategory();
+        }
+      });
+
+      // Close when clicking outside modal
+      modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+          document.body.removeChild(modalOverlay);
+        }
+      });
+    },
+
+    showError(element, message) {
+      element.textContent = message;
+      element.style.display = 'block';
+      setTimeout(() => {
+        element.style.display = 'none';
+      }, 3000);
+    },
+
+    categoryExists(slug) {
+      return !!document.querySelector(`[data-category="${slug}"]`);
+    },
+
+    addCategory(slug, name) {
+      const randomColor = this.categoryColors[
+        Math.floor(Math.random() * this.categoryColors.length)
+      ];
+
+      // Create list item
+      const listItem = document.createElement('li');
+      listItem.className = 'category-item';
+      listItem.dataset.category = slug;
+      listItem.innerHTML = `
+      <span class="category-color" style="background-color: ${randomColor};"></span>
+      <span class="category-name">${name}</span>
+      ${this.defaultCategories.includes(slug) ? '' : `
+        <button class="delete-category-btn" title="Delete category">
+          <i class="fas fa-times"></i>
+        </button>
+      `}
+    `;
+
+      // Add to sidebar list (before the add button)
+      this.categoryList.insertBefore(listItem, this.addCategoryBtn.parentNode);
+
+      // Add to both dropdowns
+      this.addToDropdown(this.taskCategorySelect, slug, name);
+      this.addToDropdown(this.editTaskCategorySelect, slug, name);
+
+      // Add delete handler if not default category
+      if (!this.defaultCategories.includes(slug)) {
+        listItem.querySelector('.delete-category-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm(`Are you sure you want to delete the "${name}" category?`)) {
+            this.removeCategory(slug);
+          }
+        });
+      }
+    },
+
+    addToDropdown(select, value, text) {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = text;
+      select.appendChild(option);
+    },
+
+    removeCategory(slug) {
+      // Remove from list
+      const item = document.querySelector(`[data-category="${slug}"]`);
+      if (item) item.remove();
+
+      // Remove from dropdowns
+      this.removeFromDropdown(this.taskCategorySelect, slug);
+      this.removeFromDropdown(this.editTaskCategorySelect, slug);
+    },
+
+    removeFromDropdown(select, value) {
+      const option = select.querySelector(`option[value="${value}"]`);
+      if (option) option.remove();
     }
   };
 
@@ -224,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
       elements.editTaskTitle.value = task.text;
       elements.editDueDate.value = task.dueDate || '';
       elements.editTaskCategory.value = task.category || 'none';
-      
+
       // Reset priority dots
       document.querySelectorAll('#task-details-modal .priority-dot').forEach(dot => {
         dot.classList.remove('active');
@@ -272,7 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTheme(theme) {
       document.body.className = '';
       document.body.classList.add(`theme-${theme}`);
-      
+
       // Update footer appearance
       const footer = document.querySelector('footer');
       const accentMap = {
@@ -282,7 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ocean: 'var(--ocean-accent)',
         light: 'var(--light-accent)'
       };
-      
+
       footer.style.setProperty('--footer-accent', accentMap[theme] || accentMap.light);
       localStorage.setItem('theme', theme);
     },
@@ -299,7 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme() {
       const savedTheme = this.getCurrentTheme();
       this.updateTheme(savedTheme);
-      
+
       if (elements.themeSelect) elements.themeSelect.value = savedTheme;
       if (elements.settingsThemePreference) elements.settingsThemePreference.value = savedTheme;
     }
@@ -312,10 +649,10 @@ document.addEventListener('DOMContentLoaded', () => {
     init() {
       // Set current year
       elements.currentYear.textContent = new Date().getFullYear();
-      
+
       // Apply smooth scroll to footer links
       elements.footerLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', function (e) {
           const href = this.getAttribute('href');
           if (href.startsWith('#') && href.length > 1) {
             e.preventDefault();
@@ -324,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
       });
-      
+
       // Add subtle animation to footer on scroll
       window.addEventListener('scroll', this.handleFooterScroll);
     },
@@ -333,11 +670,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const footer = document.querySelector('footer');
       const footerPosition = footer.getBoundingClientRect().top;
       const windowHeight = window.innerHeight;
-      
+
       if (footerPosition < windowHeight) {
         const scrollProgress = (windowHeight - footerPosition) / windowHeight;
         const clampedProgress = Math.min(scrollProgress, 1);
-        
+
         footer.style.transform = `translateY(${(1 - clampedProgress) * 10}px)`;
         footer.style.opacity = 0.5 + (0.5 * clampedProgress);
       }
@@ -391,14 +728,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Theme Change Handlers
     if (elements.themeSelect) {
-      elements.themeSelect.addEventListener('change', function() {
+      elements.themeSelect.addEventListener('change', function () {
         themeManager.updateTheme(this.value);
         if (elements.settingsThemePreference) elements.settingsThemePreference.value = this.value;
       });
     }
 
     if (elements.settingsThemePreference) {
-      elements.settingsThemePreference.addEventListener('change', function() {
+      elements.settingsThemePreference.addEventListener('change', function () {
         themeManager.updateTheme(this.value);
         if (elements.themeSelect) elements.themeSelect.value = this.value;
       });
@@ -452,6 +789,7 @@ document.addEventListener('DOMContentLoaded', () => {
     utils.updateTaskStats();
     elements.dueDateInput.valueAsDate = new Date();
     footerManager.init();
+    categoryManager.init();
     setupEventListeners();
   };
 
