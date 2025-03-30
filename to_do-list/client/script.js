@@ -67,7 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
     calendarView: document.querySelector('.calendar-view'),
 
     // Sort Select Element
-    sortSelect: document.getElementById('sort-select')
+    sortSelect: document.getElementById('sort-select'),
+
+    // Search Elements
+    searchInput: document.getElementById('search'),
+    voiceSearchBtn: document.getElementById('voice-search')
   };
 
   // Ensure list view is shown by default
@@ -81,7 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
     tasks: JSON.parse(localStorage.getItem('tasks')) || [],
     selectedPriority: 'low',
     currentEditTask: null,
-    currentFilter: 'all' // Add this line
+    currentFilter: 'all', // Add this line
+    searchQuery: ''
   };
 
   // ======================
@@ -223,6 +228,19 @@ if (task.subtasks && task.subtasks.length > 0) {
         default:
           return sortedTasks;
       }
+    },
+
+    searchTasks(tasks, query) {
+      if (!query) return tasks;
+
+      const lowerQuery = query.toLowerCase();
+      return tasks.filter(task => {
+        return (
+          task.text.toLowerCase().includes(lowerQuery) ||
+          (task.description && task.description.toLowerCase().includes(lowerQuery)) ||
+          (task.category && task.category.toLowerCase().includes(lowerQuery))
+        );
+      });
     }
   };
 
@@ -232,21 +250,27 @@ if (task.subtasks && task.subtasks.length > 0) {
   const taskManager = {
     filterTasks() {
       const today = new Date().toISOString().split('T')[0];
-      
-      return state.tasks.filter(task => {
-        switch (state.currentFilter) {
-          case 'pending':
-            return !task.completed;
-          case 'completed':
-            return task.completed;
-          case 'priority':
-            return task.priority === 'high' || task.priority === 'medium';
-          case 'today':
-            return task.dueDate === today;
-          default:
-            return true; // 'all' filter
-        }
-      });
+
+      let filteredTasks = [...state.tasks];
+
+      // Apply search filter first if there's a query
+      if (state.searchQuery) {
+        filteredTasks = utils.searchTasks(filteredTasks, state.searchQuery);
+      }
+
+      // Then apply the status filter
+      switch (state.currentFilter) {
+        case 'pending':
+          return filteredTasks.filter(task => !task.completed);
+        case 'completed':
+          return filteredTasks.filter(task => task.completed);
+        case 'priority':
+          return filteredTasks.filter(task => task.priority === 'high' || task.priority === 'medium');
+        case 'today':
+          return filteredTasks.filter(task => task.dueDate === today);
+        default:
+          return filteredTasks; // 'all' filter
+      }
     },
 
     renderTasks() {
@@ -712,6 +736,45 @@ if (task.subtasks && task.subtasks.length > 0) {
         // Re-render tasks
         taskManager.renderTasks();
       });
+    });
+
+    // Search input
+    elements.searchInput.addEventListener('input', (e) => {
+      state.searchQuery = e.target.value.trim();
+      taskManager.renderTasks();
+    });
+
+    // Voice search button
+    elements.voiceSearchBtn.addEventListener('click', () => {
+      if ('webkitSpeechRecognition' in window) {
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+
+        recognition.onstart = () => {
+          elements.searchInput.placeholder = 'Listening...';
+        };
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          elements.searchInput.value = transcript;
+          state.searchQuery = transcript;
+          taskManager.renderTasks();
+        };
+
+        recognition.onerror = (event) => {
+          console.error('Voice recognition error', event.error);
+          elements.searchInput.placeholder = 'Search tasks...';
+        };
+
+        recognition.onend = () => {
+          elements.searchInput.placeholder = 'Search tasks...';
+        };
+
+        recognition.start();
+      } else {
+        alert('Voice search is not supported in your browser');
+      }
     });
   };
 
