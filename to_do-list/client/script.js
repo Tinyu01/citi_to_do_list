@@ -238,11 +238,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const lowerQuery = query.toLowerCase();
       return tasks.filter(task => {
-        return (
-          task.text.toLowerCase().includes(lowerQuery) ||
-          (task.description && task.description.toLowerCase().includes(lowerQuery)) ||
-          (task.category && task.category.toLowerCase().includes(lowerQuery))
-        );
+        const matchesText = task.text.toLowerCase().includes(lowerQuery);
+        const matchesDesc = task.description && task.description.toLowerCase().includes(lowerQuery);
+        const matchesCategory = task.category && task.category.toLowerCase().includes(lowerQuery);
+        
+        return matchesText || matchesDesc || matchesCategory;
       });
     },
 
@@ -400,8 +400,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const taskManager = {
     filterTasks() {
       const today = new Date().toISOString().split('T')[0];
-
-      return state.tasks.filter((task) => {
+      
+      // First apply the main filter
+      let filteredTasks = state.tasks.filter((task) => {
         switch (state.currentFilter) {
           case 'pending':
             return !task.completed;
@@ -417,6 +418,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         }
       });
+      
+      // Then apply search if there's a query
+      if (state.searchQuery) {
+        filteredTasks = utils.searchTasks(filteredTasks, state.searchQuery);
+      }
+      
+      return filteredTasks;
     },
 
     renderTasks() {
@@ -864,38 +872,51 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.searchInput.addEventListener('input', (e) => {
       state.searchQuery = e.target.value.trim();
       taskManager.renderTasks();
+      updateSearchUI();
     });
 
     elements.voiceSearchBtn.addEventListener('click', () => {
-      if ('webkitSpeechRecognition' in window) {
-        const recognition = new webkitSpeechRecognition();
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-
-        recognition.onstart = () => {
-          elements.searchInput.placeholder = 'Listening...';
-        };
-
-        recognition.onresult = (event) => {
-          const transcript = event.results[0][0].transcript;
-          elements.searchInput.value = transcript;
-          state.searchQuery = transcript;
-          taskManager.renderTasks();
-        };
-
-        recognition.onerror = (event) => {
-          console.error('Voice recognition error', event.error);
-          elements.searchInput.placeholder = 'Search tasks...';
-        };
-
-        recognition.onend = () => {
-          elements.searchInput.placeholder = 'Search tasks...';
-        };
-
-        recognition.start();
-      } else {
+      if (!('webkitSpeechRecognition' in window)) {
         alert('Voice search is not supported in your browser');
+        return;
       }
+
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        elements.searchInput.placeholder = 'Listening...';
+        elements.voiceSearchBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        elements.voiceSearchBtn.style.color = 'var(--priority-high)';
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        elements.searchInput.value = transcript;
+        state.searchQuery = transcript;
+        taskManager.renderTasks();
+        updateSearchUI();
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Voice recognition error', event.error);
+        elements.searchInput.placeholder = 'Search tasks...';
+        resetVoiceButton();
+      };
+
+      recognition.onend = () => {
+        elements.searchInput.placeholder = 'Search tasks...';
+        resetVoiceButton();
+      };
+
+      function resetVoiceButton() {
+        elements.voiceSearchBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        elements.voiceSearchBtn.style.color = '';
+      }
+
+      recognition.start();
     });
 
     document.addEventListener('requestProductivityData', (e) => {
@@ -906,6 +927,59 @@ document.addEventListener('DOMContentLoaded', () => {
       document.dispatchEvent(responseEvent);
     });
   };
+
+  // ======================
+  // HELPER FUNCTIONS
+  // ======================
+  function updateSearchUI() {
+    const searchContainer = elements.searchInput.parentElement;
+    const clearBtn = searchContainer.querySelector('.clear-search');
+    
+    if (state.searchQuery) {
+      if (!clearBtn) {
+        const clearBtn = document.createElement('button');
+        clearBtn.className = 'clear-search icon-btn';
+        clearBtn.innerHTML = '<i class="fas fa-times"></i>';
+        clearBtn.addEventListener('click', () => {
+          elements.searchInput.value = '';
+          state.searchQuery = '';
+          taskManager.renderTasks();
+          updateSearchUI();
+        });
+        searchContainer.appendChild(clearBtn);
+      }
+      
+      // Highlight search results in task items
+      document.querySelectorAll('.task-item').forEach(taskItem => {
+        const title = taskItem.querySelector('.task-title');
+        const desc = taskItem.querySelector('.task-description');
+        
+        if (title) highlightText(title, state.searchQuery);
+        if (desc) highlightText(desc, state.searchQuery);
+      });
+    } else {
+      if (clearBtn) clearBtn.remove();
+      
+      // Remove highlights
+      document.querySelectorAll('.highlight').forEach(el => {
+        const parent = el.parentNode;
+        parent.textContent = parent.textContent;
+        parent.normalize();
+      });
+    }
+  }
+
+  function highlightText(element, query) {
+    const text = element.textContent;
+    const queryRegex = new RegExp(query, 'gi');
+    const newText = text.replace(queryRegex, match => 
+      `<span class="highlight">${match}</span>`
+    );
+    
+    if (newText !== text) {
+      element.innerHTML = newText;
+    }
+  }
 
   // ======================
   // INITIALIZATION

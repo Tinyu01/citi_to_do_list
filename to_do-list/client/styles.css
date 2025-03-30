@@ -521,14 +521,33 @@
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--border-radius-sm);
     box-shadow: var(--shadow-sm);
-    transition: background-color var(--transition-normal);
+    transition: background-color var(--transition-normal), box-shadow var(--transition-fast);
   }
   
   .search-container input {
+    flex: 1;
     border: none;
     background-color: transparent;
     color: var(--text);
     outline: none;
+    font-size: 1rem;
+  }
+  
+  .search-container input::placeholder {
+    color: var(--text-secondary);
+  }
+  
+  .search-container button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+  }
+  
+  .search-container button:hover {
+    color: var(--accent);
   }
   
   .filter-container {
