@@ -678,14 +678,26 @@
   
   /* Empty State Styles */
   .empty-state {
-    text-align: center;
+    display: flex;
+    flex-direction: column; /* This makes children stack vertically */
+    align-items: center; /* Centers items horizontally */
+    justify-content: center; /* Centers items vertically */
+    gap: var(--spacing-md); /* Adds space between items */
     padding: var(--spacing-lg);
+    text-align: center; /* Centers text */
   }
   
   .empty-image {
-    max-width: 100%;
-    height: auto;
     margin-bottom: var(--spacing-md);
+  }
+  
+  .empty-state p {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  #empty-add-task {
+    width: auto; /* Let the button size to its content */
+    padding: var(--spacing-sm) var(--spacing-md);
   }
   
   /* Add Task Container */
@@ -712,6 +724,21 @@
   .add-task-container input:focus {
     border-color: var(--accent);
     outline: none;
+  }
+
+  .add-task-container .form-group {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .add-task-container textarea {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--bg);
+    color: var(--text);
+    resize: vertical;
+    min-height: 80px;
   }
 
   #new-task {
@@ -1644,4 +1671,68 @@
   font-size: 0.9rem;
   margin-top: 8px;
   display: none;
+}
+
+/* Task item styles */
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.task-priority {
+  display: flex;
+  align-items: center;
+}
+
+.task-description {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  white-space: pre-wrap;
+}
+
+.subtasks-container {
+  margin-top: 0.5rem;
+}
+
+.toggle-subtasks-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: all var(--transition-fast);
+}
+
+.toggle-subtasks-btn:hover {
+  color: var(--accent);
+}
+
+.subtasks-list {
+  list-style: none;
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.subtask-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+.subtask-item.completed {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.subtask-item input[type="checkbox"] {
+  margin-right: 0.5rem;
 }

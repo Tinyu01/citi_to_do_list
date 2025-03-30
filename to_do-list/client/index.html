@@ -195,29 +195,43 @@
         </div>
 
         <div class="add-task-container">
-          <input type="text" id="new-task" placeholder="Add a new task">
-          <div class="task-details">
-            <div class="due-date-selector">
-              <i class="fas fa-calendar-alt"></i>
-              <input type="date" id="due-date" min="">
+          <div class="form-group">
+            <label for="new-task">Title</label>
+            <input type="text" id="new-task" placeholder="Add a new task" required>
+          </div>
+          <div class="form-group">
+            <label for="task-description">Description (Optional)</label>
+            <textarea id="task-description" rows="3" placeholder="Add a description"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="due-date">Due Date</label>
+              <input type="date" id="due-date" min="" required>
             </div>
-            <div class="category-selector">
-              <i class="fas fa-tag"></i>
-              <select id="task-category">
+            <div class="form-group">
+              <label for="task-category">Category</label>
+              <select id="task-category" required>
                 <option value="none">Select Category</option>
                 <option value="work">Work</option>
                 <option value="personal">Personal</option>
                 <option value="health">Health</option>
               </select>
             </div>
+          </div>
+          <div class="form-group">
+            <label>Priority</label>
             <div class="priority-selector">
-              <span><b>Priority:</b></span><br>
-              <p>Low</p>
-              <span class="priority-dot low active" data-priority="low" title="Low Priority"></span><br>
-              <p>Medium</p>
-              <span class="priority-dot medium" data-priority="medium" title="Medium Priority"></span><br>
-              <P>High</P>
+              <span class="priority-dot low active" data-priority="low" title="Low Priority"></span>
+              <span class="priority-dot medium" data-priority="medium" title="Medium Priority"></span>
               <span class="priority-dot high" data-priority="high" title="High Priority"></span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Subtasks (Optional)</label>
+            <ul id="subtasks-list"></ul>
+            <div class="add-subtask">
+              <input type="text" id="new-subtask" placeholder="Add subtask">
+              <button id="add-subtask-btn">Add</button>
             </div>
           </div>
           <button id="add-task">
