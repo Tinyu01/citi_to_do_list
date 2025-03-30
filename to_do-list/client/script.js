@@ -65,6 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Calendar View Elements
     calendarViewBtn: document.getElementById('calender-view-btn'),
     calendarView: document.querySelector('.calendar-view'),
+    calendarTitle: document.getElementById('calendar-title'),
+    calendarGrid: document.getElementById('calendar-grid'),
+    prevMonthBtn: document.getElementById('prev-month'),
+    nextMonthBtn: document.getElementById('next-month'),
 
     // Sort Select Element
     sortSelect: document.getElementById('sort-select'),
@@ -85,8 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
     tasks: JSON.parse(localStorage.getItem('tasks')) || [],
     selectedPriority: 'low',
     currentEditTask: null,
-    currentFilter: 'all', // Add this line
-    searchQuery: ''
+    currentFilter: 'all',
+    searchQuery: '',
+    currentDate: new Date(),
+    currentFilterDate: null
   };
 
   // ======================
@@ -155,29 +161,26 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
 
-    // Add this after creating the task element
-if (task.subtasks && task.subtasks.length > 0) {
-  const toggleBtn = taskItem.querySelector('.toggle-subtasks-btn');
-  const subtasksList = taskItem.querySelector('.subtasks-list');
-  
-  toggleBtn.addEventListener('click', () => {
-    const isHidden = subtasksList.style.display === 'none';
-    subtasksList.style.display = isHidden ? 'block' : 'none';
-    toggleBtn.querySelector('i').className = isHidden 
-      ? 'fas fa-chevron-up' 
-      : 'fas fa-chevron-down';
-  });
-  
-  // Add event listeners for subtask checkboxes
-  taskItem.querySelectorAll('.subtask-item input[type="checkbox"]').forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-      const subtaskItem = this.closest('.subtask-item');
-      subtaskItem.classList.toggle('completed', this.checked);
-    });
-  });
-}
+    if (task.subtasks && task.subtasks.length > 0) {
+      const toggleBtn = taskItem.querySelector('.toggle-subtasks-btn');
+      const subtasksList = taskItem.querySelector('.subtasks-list');
+      
+      toggleBtn.addEventListener('click', () => {
+        const isHidden = subtasksList.style.display === 'none';
+        subtasksList.style.display = isHidden ? 'block' : 'none';
+        toggleBtn.querySelector('i').className = isHidden 
+          ? 'fas fa-chevron-up' 
+          : 'fas fa-chevron-down';
+      });
+      
+      taskItem.querySelectorAll('.subtask-item input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+          const subtaskItem = this.closest('.subtask-item');
+          subtaskItem.classList.toggle('completed', this.checked);
+        });
+      });
+    }
 
-      // Add event listeners to the task element
       const checkbox = taskItem.querySelector('.task-checkbox input');
       checkbox.addEventListener('change', () => taskManager.toggleTaskCompletion(task.id));
 
@@ -202,14 +205,14 @@ if (task.subtasks && task.subtasks.length > 0) {
       switch(sortBy) {
         case 'date-asc':
           return sortedTasks.sort((a, b) => {
-            const dateA = a.dueDate ? new Date(a.dueDate) : new Date('9999-12-31'); // Future date for tasks without due date
+            const dateA = a.dueDate ? new Date(a.dueDate) : new Date('9999-12-31');
             const dateB = b.dueDate ? new Date(b.dueDate) : new Date('9999-12-31');
             return dateA - dateB;
           });
           
         case 'date-desc':
           return sortedTasks.sort((a, b) => {
-            const dateA = a.dueDate ? new Date(a.dueDate) : new Date(0); // Epoch for tasks without due date
+            const dateA = a.dueDate ? new Date(a.dueDate) : new Date(0);
             const dateB = b.dueDate ? new Date(b.dueDate) : new Date(0);
             return dateB - dateA;
           });
@@ -241,7 +244,104 @@ if (task.subtasks && task.subtasks.length > 0) {
           (task.category && task.category.toLowerCase().includes(lowerQuery))
         );
       });
-    }
+    },
+
+    formatDate: (date) => {
+      return date.toISOString().split('T')[0];
+    },
+
+    getDaysInMonth: (year, month) => {
+      return new Date(year, month + 1, 0).getDate();
+    },
+
+    getFirstDayOfMonth: (year, month) => {
+      return new Date(year, month, 1).getDay();
+    },
+
+    renderCalendar: function () {
+      const year = state.currentDate.getFullYear();
+      const month = state.currentDate.getMonth();
+
+      elements.calendarTitle.textContent = new Date(year, month).toLocaleDateString('default', {
+        month: 'long',
+        year: 'numeric',
+      });
+
+      elements.calendarGrid.innerHTML = '';
+
+      const daysInMonth = this.getDaysInMonth(year, month);
+      const firstDayOfMonth = this.getFirstDayOfMonth(year, month);
+
+      for (let i = 0; i < firstDayOfMonth; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-day empty';
+        elements.calendarGrid.appendChild(emptyCell);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const dateString = this.formatDate(date);
+
+        const dayCell = document.createElement('div');
+        dayCell.className = 'calendar-day';
+        dayCell.dataset.date = dateString;
+
+        const today = new Date();
+        if (
+          date.getDate() === today.getDate() &&
+          date.getMonth() === today.getMonth() &&
+          date.getFullYear() === today.getFullYear()
+        ) {
+          dayCell.classList.add('today');
+        }
+
+        const dayNumber = document.createElement('div');
+        dayNumber.className = 'day-number';
+        dayNumber.textContent = day;
+        dayCell.appendChild(dayNumber);
+
+        const tasksForDay = state.tasks.filter((task) => task.dueDate === dateString);
+        if (tasksForDay.length > 0) {
+          const tasksContainer = document.createElement('div');
+          tasksContainer.className = 'day-tasks';
+
+          tasksForDay.forEach((task) => {
+            const taskDot = document.createElement('div');
+            taskDot.className = `task-dot priority-${task.priority}`;
+            taskDot.title = task.text;
+            tasksContainer.appendChild(taskDot);
+          });
+
+          dayCell.appendChild(tasksContainer);
+        }
+
+        elements.calendarGrid.appendChild(dayCell);
+      }
+    },
+
+    setupCalendarListeners: function () {
+      elements.prevMonthBtn.addEventListener('click', () => {
+        state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+        this.renderCalendar();
+      });
+
+      elements.nextMonthBtn.addEventListener('click', () => {
+        state.currentDate.setMonth(state.currentDate.getMonth() + 1);
+        this.renderCalendar();
+      });
+
+      elements.calendarGrid.addEventListener('click', (e) => {
+        const dayCell = e.target.closest('.calendar-day:not(.empty)');
+        if (dayCell) {
+          const date = dayCell.dataset.date;
+          state.currentFilter = 'date';
+          state.currentFilterDate = date;
+          taskManager.renderTasks();
+
+          elements.listViewBtn.click();
+        }
+      });
+    },
   };
 
   // ======================
@@ -251,40 +351,32 @@ if (task.subtasks && task.subtasks.length > 0) {
     filterTasks() {
       const today = new Date().toISOString().split('T')[0];
 
-      let filteredTasks = [...state.tasks];
-
-      // Apply search filter first if there's a query
-      if (state.searchQuery) {
-        filteredTasks = utils.searchTasks(filteredTasks, state.searchQuery);
-      }
-
-      // Then apply the status filter
-      switch (state.currentFilter) {
-        case 'pending':
-          return filteredTasks.filter(task => !task.completed);
-        case 'completed':
-          return filteredTasks.filter(task => task.completed);
-        case 'priority':
-          return filteredTasks.filter(task => task.priority === 'high' || task.priority === 'medium');
-        case 'today':
-          return filteredTasks.filter(task => task.dueDate === today);
-        default:
-          return filteredTasks; // 'all' filter
-      }
+      return state.tasks.filter((task) => {
+        switch (state.currentFilter) {
+          case 'pending':
+            return !task.completed;
+          case 'completed':
+            return task.completed;
+          case 'priority':
+            return task.priority === 'high' || task.priority === 'medium';
+          case 'today':
+            return task.dueDate === today;
+          case 'date':
+            return task.dueDate === state.currentFilterDate;
+          default:
+            return true;
+        }
+      });
     },
 
     renderTasks() {
-      // Clear existing lists
       [elements.tasksList, elements.todoList, elements.inProgressList, elements.completedList]
         .forEach(list => list.innerHTML = '');
 
-      // Get filtered tasks
       const filteredTasks = this.filterTasks();
       
-      // Get sort option
       const sortBy = elements.sortSelect.value;
       
-      // Sort the filtered tasks
       const sortedTasks = utils.sortTasks(filteredTasks, sortBy);
 
       if (sortedTasks.length === 0) {
@@ -297,7 +389,6 @@ if (task.subtasks && task.subtasks.length > 0) {
       sortedTasks.forEach(task => {
         const taskElement = utils.createTaskElement(task);
 
-        // Render in multiple views
         elements.tasksList.appendChild(taskElement);
 
         if (task.completed) {
@@ -318,13 +409,14 @@ if (task.subtasks && task.subtasks.length > 0) {
 
       if (!taskText) return;
 
-      // Validate date is not in the past
-      const selectedDate = new Date(elements.dueDateInput.value);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
+      const selectedDate = new Date(elements.dueDateInput.value);
+      selectedDate.setHours(0, 0, 0, 0);
+
       if (selectedDate < today) {
-        alert("Please select a date from today onwards");
+        alert("Please select today's date or a future date");
         return;
       }
 
@@ -344,11 +436,10 @@ if (task.subtasks && task.subtasks.length > 0) {
       utils.saveTasksToLocalStorage();
       this.renderTasks();
 
-      // Reset form
       elements.newTaskInput.value = '';
       elements.taskDescription.value = '';
       elements.taskCategorySelect.value = 'none';
-      elements.dueDateInput.value = '';
+      elements.dueDateInput.value = today.toISOString().split('T')[0];
       document.querySelector('.priority-dot.active').classList.remove('active');
       document.querySelector('.priority-dot[data-priority="low"]').classList.add('active');
       state.selectedPriority = 'low';
@@ -388,11 +479,9 @@ if (task.subtasks && task.subtasks.length > 0) {
       state.currentEditTask = task;
       elements.editTaskTitle.value = task.text || '';
       
-      // Set minimum date to today for edit modal
       const today = new Date().toISOString().split('T')[0];
       elements.editDueDate.setAttribute('min', today);
 
-      // If existing due date is in the past, set to today
       if (task.dueDate && new Date(task.dueDate) < new Date()) {
         elements.editDueDate.value = today;
       } else {
@@ -402,7 +491,6 @@ if (task.subtasks && task.subtasks.length > 0) {
       elements.editTaskCategory.value = task.category || 'none';
       elements.editTaskDescription.value = task.description || '';
 
-      // Reset priority dots
       document.querySelectorAll('#task-details-modal .priority-dot').forEach(dot => {
         dot.classList.remove('active');
         if (dot.dataset.priority === (task.priority || 'low')) {
@@ -410,7 +498,6 @@ if (task.subtasks && task.subtasks.length > 0) {
         }
       });
 
-      // Clear and repopulate subtasks
       elements.subtasksList.innerHTML = '';
       if (task.subtasks && task.subtasks.length > 0) {
         task.subtasks.forEach(subtask => {
@@ -421,17 +508,14 @@ if (task.subtasks && task.subtasks.length > 0) {
           `;
           elements.subtasksList.appendChild(subtaskItem);
 
-          // Add delete handler for subtasks
           subtaskItem.querySelector('.delete-subtask-btn').addEventListener('click', () => {
             subtaskItem.remove();
           });
         });
       }
 
-      // Show/hide delete button based on whether this is a new task or existing one
       elements.deleteTaskBtn.style.display = state.currentEditTask ? 'block' : 'none';
       
-      // Update modal title
       const modalTitle = elements.taskDetailsModal.querySelector('.modal-header h2');
       modalTitle.textContent = state.currentEditTask ? 'Task Details' : 'Add New Task';
 
@@ -455,13 +539,14 @@ if (task.subtasks && task.subtasks.length > 0) {
         completed: false
       }));
 
-      // Validate date is not in the past
-      const selectedDate = new Date(elements.editDueDate.value);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
+      const selectedDate = new Date(elements.editDueDate.value);
+      selectedDate.setHours(0, 0, 0, 0);
+
       if (selectedDate < today) {
-        alert("Please select a date from today onwards");
+        alert("Please select today's date or a future date");
         return;
       }
 
@@ -478,10 +563,8 @@ if (task.subtasks && task.subtasks.length > 0) {
       };
 
       if (state.currentEditTask) {
-        // Update existing task
         taskManager.updateTask(taskData);
       } else {
-        // Add new task
         state.tasks.unshift(taskData);
         utils.saveTasksToLocalStorage();
         taskManager.renderTasks();
@@ -504,7 +587,6 @@ if (task.subtasks && task.subtasks.length > 0) {
       document.body.className = '';
       document.body.classList.add(`theme-${theme}`);
 
-      // Update footer appearance
       const footer = document.querySelector('footer');
       const accentMap = {
         dark: 'var(--dark-accent)',
@@ -541,10 +623,8 @@ if (task.subtasks && task.subtasks.length > 0) {
   // ======================
   const footerManager = {
     init() {
-      // Set current year
       elements.currentYear.textContent = new Date().getFullYear();
 
-      // Apply smooth scroll to footer links
       elements.footerLinks.forEach(link => {
         link.addEventListener('click', function (e) {
           const href = this.getAttribute('href');
@@ -556,7 +636,6 @@ if (task.subtasks && task.subtasks.length > 0) {
         });
       });
 
-      // Add subtle animation to footer on scroll
       window.addEventListener('scroll', this.handleFooterScroll);
     },
 
@@ -579,33 +658,28 @@ if (task.subtasks && task.subtasks.length > 0) {
   // EVENT LISTENERS
   // ======================
   const setupEventListeners = () => {
-    // Task Management
     elements.addTaskBtn.addEventListener('click', () => taskManager.addTask());
     elements.emptyAddTaskBtn.addEventListener('click', () => {
-      // Create a new empty task object
       const newTask = {
         id: Date.now(),
         text: '',
         completed: false,
         category: null,
-        dueDate: new Date().toISOString().split('T')[0], // Today's date
+        dueDate: new Date().toISOString().split('T')[0],
         priority: 'low',
         description: '',
         subtasks: []
       };
       
-      // Open the modal with this empty task
       modals.openTaskDetailsModal(newTask);
       
-      // Set the modal to "add mode" rather than "edit mode"
       state.currentEditTask = null;
-      elements.deleteTaskBtn.style.display = 'none'; // Hide delete button for new tasks
+      elements.deleteTaskBtn.style.display = 'none';
     });
     elements.newTaskInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') taskManager.addTask();
     });
 
-    // Priority Selector
     elements.priorityDots.forEach(dot => {
       dot.addEventListener('click', () => {
         elements.priorityDots.forEach(d => d.classList.remove('active'));
@@ -614,7 +688,6 @@ if (task.subtasks && task.subtasks.length > 0) {
       });
     });
 
-    // Modal Close Buttons
     elements.closeModalBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         modals.closeModal(elements.taskDetailsModal);
@@ -622,7 +695,6 @@ if (task.subtasks && task.subtasks.length > 0) {
       });
     });
 
-    // Settings Modal
     elements.settingsBtn.addEventListener('click', () => {
       elements.settingsModal.style.display = 'flex';
       setTimeout(() => {
@@ -630,7 +702,6 @@ if (task.subtasks && task.subtasks.length > 0) {
       }, 10);
     });
 
-    // Task Details Modal Actions
     elements.saveTaskBtn.addEventListener('click', () => modals.saveTaskChanges());
     elements.deleteTaskBtn.addEventListener('click', () => {
       if (state.currentEditTask) {
@@ -639,7 +710,6 @@ if (task.subtasks && task.subtasks.length > 0) {
       }
     });
 
-    // Subtask Management
     elements.addSubtaskBtn.addEventListener('click', () => {
       const subtaskText = elements.newSubtaskInput.value.trim();
       if (subtaskText) {
@@ -651,7 +721,6 @@ if (task.subtasks && task.subtasks.length > 0) {
         elements.subtasksList.appendChild(subtaskItem);
         elements.newSubtaskInput.value = '';
 
-        // Add delete handler for the new subtask
         subtaskItem.querySelector('.delete-subtask-btn').addEventListener('click', () => {
           subtaskItem.remove();
         });
@@ -664,7 +733,6 @@ if (task.subtasks && task.subtasks.length > 0) {
       }
     });
 
-    // Theme Change Handlers
     if (elements.themeSelect) {
       elements.themeSelect.addEventListener('change', function () {
         themeManager.updateTheme(this.value);
@@ -679,23 +747,19 @@ if (task.subtasks && task.subtasks.length > 0) {
       });
     }
 
-    // Close modal when clicking outside
     window.addEventListener('click', (e) => {
       if (e.target === elements.taskDetailsModal) modals.closeModal(elements.taskDetailsModal);
       if (e.target === elements.settingsModal) modals.closeModal(elements.settingsModal);
     });
 
-    // Kanban View Button
     elements.kanbanViewBtn.addEventListener('click', () => {
       elements.kanbanView.style.display = 'block';
     });
 
-    // List View Button
     elements.listViewBtn.addEventListener('click', () => {
       elements.listView.style.display = 'block';
     });
 
-    // Calendar View Button
     elements.calendarViewBtn.addEventListener('click', () => {
       elements.calendarView.style.display = 'block';
     });
@@ -717,34 +781,26 @@ if (task.subtasks && task.subtasks.length > 0) {
       });
     });
 
-    // Sort selection
     elements.sortSelect.addEventListener('change', () => {
       taskManager.renderTasks();
     });
 
-    // Filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        // Remove active class from all buttons
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        // Add active class to clicked button
         btn.classList.add('active');
         
-        // Update filter state
         state.currentFilter = btn.dataset.filter;
         
-        // Re-render tasks
         taskManager.renderTasks();
       });
     });
 
-    // Search input
     elements.searchInput.addEventListener('input', (e) => {
       state.searchQuery = e.target.value.trim();
       taskManager.renderTasks();
     });
 
-    // Voice search button
     elements.voiceSearchBtn.addEventListener('click', () => {
       if ('webkitSpeechRecognition' in window) {
         const recognition = new webkitSpeechRecognition();
@@ -785,12 +841,14 @@ if (task.subtasks && task.subtasks.length > 0) {
     themeManager.initializeTheme();
     taskManager.renderTasks();
     utils.updateTaskStats();
+    utils.renderCalendar();
+    utils.setupCalendarListeners();
 
-    // Set minimum date to today
-    const today = new Date().toISOString().split('T')[0];
-    elements.dueDateInput.setAttribute('min', today);
-    elements.dueDateInput.value = today;
-    elements.editDueDate.setAttribute('min', today); // Also set for edit modal
+    const today = new Date();
+    const todayFormatted = today.toISOString().split('T')[0];
+    elements.dueDateInput.setAttribute('min', todayFormatted);
+    elements.dueDateInput.value = todayFormatted;
+    elements.editDueDate.setAttribute('min', todayFormatted);
 
     footerManager.init();
     setupEventListeners();

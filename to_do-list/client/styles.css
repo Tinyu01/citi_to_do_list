@@ -656,6 +656,26 @@
     margin-bottom: var(--spacing-md);
   }
   
+  .calendar-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+  
+  .calendar-header button {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
+  }
+  
+  .calendar-header button:hover {
+    background-color: var(--hover);
+  }
+  
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -664,16 +684,57 @@
   
   .calendar-day {
     aspect-ratio: 1;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--border-radius-sm);
     transition: all var(--transition-fast);
   }
   
-  .calendar-day:hover {
+  .calendar-day.empty {
+    background-color: transparent;
+    border: none;
+  }
+  
+  .calendar-day:hover:not(.empty) {
     background-color: var(--hover);
+    cursor: pointer;
+  }
+  
+  .calendar-day.today {
+    border-color: var(--accent);
+  }
+  
+  .day-number {
+    font-weight: bold;
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .day-tasks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-top: auto;
+  }
+  
+  .task-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  
+  .task-dot.priority-high {
+    background-color: var(--priority-high);
+  }
+  
+  .task-dot.priority-medium {
+    background-color: var(--priority-medium);
+  }
+  
+  .task-dot.priority-low {
+    background-color: var(--priority-low);
   }
   
   /* Empty State Styles */
