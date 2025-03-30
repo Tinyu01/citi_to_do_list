@@ -32,8 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
     editTaskTitle: document.getElementById('edit-task-title'),
     editDueDate: document.getElementById('edit-due-date'),
     editTaskCategory: document.getElementById('edit-task-category'),
+    editTaskDescription: document.getElementById('edit-task-description'),
     saveTaskBtn: document.getElementById('save-task-btn'),
     deleteTaskBtn: document.getElementById('delete-task-btn'),
+    newSubtaskInput: document.getElementById('new-subtask'),
+    addSubtaskBtn: document.getElementById('add-subtask-btn'),
+    subtasksList: document.getElementById('subtasks-list'),
 
     // Theme Elements
     themeSelect: document.getElementById('theme-select'),
@@ -124,163 +128,20 @@ document.addEventListener('DOMContentLoaded', () => {
       checkbox.addEventListener('change', () => taskManager.toggleTaskCompletion(task.id));
 
       const editBtn = taskItem.querySelector('.edit-task-btn');
-      editBtn.addEventListener('click', () => modals.openTaskDetailsModal(task));
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        modals.openTaskDetailsModal(task);
+      });
 
       const deleteBtn = taskItem.querySelector('.delete-task-btn');
-      deleteBtn.addEventListener('click', () => taskManager.deleteTask(task.id));
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        taskManager.deleteTask(task.id);
+      });
 
       return taskItem;
     }
   };
-
-  // Category Management Button Interaction
-  document.addEventListener('DOMContentLoaded', () => {
-    const addCategoryBtn = document.getElementById('add-category');
-
-    // Prevent multiple click event listeners
-    addCategoryBtn.removeEventListener('click', addCategoryHandler);
-    addCategoryBtn.addEventListener('click', addCategoryHandler);
-
-    // Add hover and active states for better UX
-    addCategoryBtn.addEventListener('mouseenter', () => {
-      addCategoryBtn.style.transform = 'scale(1.05)';
-      addCategoryBtn.style.opacity = '0.9';
-    });
-
-    addCategoryBtn.addEventListener('mouseleave', () => {
-      addCategoryBtn.style.transform = 'scale(1)';
-      addCategoryBtn.style.opacity = '1';
-    });
-
-    // Ensure button is not disabled
-    addCategoryBtn.disabled = false;
-  });
-
-  // Category addition handler
-  function addCategoryHandler() {
-    // Temporary disable button to prevent multiple clicks
-    const addCategoryBtn = document.getElementById('add-category');
-    addCategoryBtn.disabled = true;
-
-    // Show modal for better user experience
-    const categoryModal = createCategoryModal();
-    document.body.appendChild(categoryModal);
-
-    // Focus on input for immediate interaction
-    const categoryInput = categoryModal.querySelector('#new-category-input');
-    categoryInput.focus();
-  }
-
-  // Create a modal for adding categories
-  function createCategoryModal() {
-    const modal = document.createElement('div');
-    modal.innerHTML = `
-      <div class="category-modal" style="
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0,0,0,0.5);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          z-index: 1000;
-      ">
-          <div class="category-modal-content" style="
-              background: white;
-              padding: 20px;
-              border-radius: 8px;
-              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-              width: 300px;
-          ">
-              <h2 style="margin-bottom: 15px;">Add New Category</h2>
-              <input 
-                  type="text" 
-                  id="new-category-input" 
-                  placeholder="Enter category name" 
-                  style="
-                      width: 100%;
-                      padding: 10px;
-                      margin-bottom: 15px;
-                      border: 1px solid #ddd;
-                      border-radius: 4px;
-                  "
-              >
-              <div style="display: flex; justify-content: space-between;">
-                  <button id="cancel-category" style="
-                      background-color: #f3f4f6;
-                      color: #374151;
-                      border: none;
-                      padding: 10px 15px;
-                      border-radius: 4px;
-                      cursor: pointer;
-                  ">Cancel</button>
-                  <button id="confirm-category" style="
-                      background-color: #3b82f6;
-                      color: white;
-                      border: none;
-                      padding: 10px 15px;
-                      border-radius: 4px;
-                      cursor: pointer;
-                  ">Add Category</button>
-              </div>
-          </div>
-      </div>
-  `;
-
-    // Cancel button
-    const cancelBtn = modal.querySelector('#cancel-category');
-    cancelBtn.addEventListener('click', () => {
-      document.body.removeChild(modal);
-      document.getElementById('add-category').disabled = false;
-    });
-
-    // Confirm button
-    const confirmBtn = modal.querySelector('#confirm-category');
-    confirmBtn.addEventListener('click', () => {
-      const categoryInput = modal.querySelector('#new-category-input');
-      const categoryName = categoryInput.value.trim();
-
-      // Check if category name is provided
-      if (!categoryName) {
-        showNotification('Category name cannot be empty', 'error');
-        return;
-      }
-
-      // Check if category already exists
-      if (categoryExists(categoryName)) {
-        showNotification(`Category "${categoryName}" already exists`, 'error');
-        return;
-      }
-
-      // Add the new category
-      const categoryData = {
-        name: categoryName,
-        color: categoryColors[Math.floor(Math.random() * categoryColors.length)]
-      };
-      addCategoryToUI(categoryData);
-
-      // Show success notification
-      showNotification(`Category "${categoryName}" added successfully`);
-
-      // Remove modal and re-enable button
-      document.body.removeChild(modal);
-      document.getElementById('add-category').disabled = false;
-    });
-
-    // Allow Enter key to submit
-    const categoryInput = modal.querySelector('#new-category-input');
-    categoryInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        confirmBtn.click();
-      }
-    });
-
-    return modal;
-  }
-
-  // Existing helper functions (categoryExists, showNotification, etc.) remain the same as in previous implementation
 
   // ======================
   // TASK MANAGEMENT
@@ -316,6 +177,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const taskText = elements.newTaskInput.value.trim();
       if (!taskText) return;
 
+      // Validate date is not in the past
+      const selectedDate = new Date(elements.dueDateInput.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Compare only dates, not times
+
+      if (selectedDate < today) {
+        alert("Please select a date from today onwards");
+        return;
+      }
+
       const newTask = {
         id: Date.now(),
         text: taskText,
@@ -323,6 +194,8 @@ document.addEventListener('DOMContentLoaded', () => {
         category: elements.taskCategorySelect.value !== 'none' ? elements.taskCategorySelect.value : null,
         dueDate: elements.dueDateInput.value || null,
         priority: state.selectedPriority,
+        description: '', // Initialize with empty description
+        subtasks: [], // Initialize with empty subtasks array
         createdAt: new Date().toISOString()
       };
 
@@ -365,202 +238,26 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ======================
-  // CATEGORY MANAGEMENT
-  // ======================
-  const categoryManager = {
-    init() {
-      this.addCategoryBtn = document.getElementById('add-category');
-      this.categoryList = document.getElementById('category-list');
-      this.taskCategorySelect = document.getElementById('task-category');
-      this.editTaskCategorySelect = document.getElementById('edit-task-category');
-
-      // Predefined color palette
-      this.categoryColors = [
-        '#6366f1', '#f59e0b', '#10b981', '#ef4444',
-        '#8b5cf6', '#ec4899', '#14b8a6', '#f97316',
-        '#0ea5e9', '#84cc16'
-      ];
-
-      this.defaultCategories = ['all', 'work', 'personal', 'health'];
-      this.setupEventListeners();
-    },
-
-    setupEventListeners() {
-      this.addCategoryBtn.addEventListener('click', () => this.showAddCategoryModal());
-    },
-
-    showAddCategoryModal() {
-      // Create modal elements
-      const modalOverlay = document.createElement('div');
-      modalOverlay.className = 'category-modal-overlay';
-
-      modalOverlay.innerHTML = `
-      <div class="category-modal">
-        <div class="modal-header">
-          <h3>Add New Category</h3>
-          <button class="close-modal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <input type="text" id="new-category-input" placeholder="Enter category name">
-          <div class="error-message" id="category-error"></div>
-        </div>
-        <div class="modal-footer">
-          <button class="secondary-btn" id="cancel-category">Cancel</button>
-          <button class="primary-btn" id="confirm-category">Add Category</button>
-        </div>
-      </div>
-    `;
-
-      document.body.appendChild(modalOverlay);
-
-      // Get DOM references
-      const input = modalOverlay.querySelector('#new-category-input');
-      const errorElement = modalOverlay.querySelector('#category-error');
-      const confirmBtn = modalOverlay.querySelector('#confirm-category');
-      const cancelBtn = modalOverlay.querySelector('#cancel-category');
-      const closeBtn = modalOverlay.querySelector('.close-modal');
-
-      // Focus input field immediately
-      input.focus();
-
-      // Clear any previous errors
-      errorElement.textContent = '';
-
-      // Event handler for adding category
-      const handleAddCategory = () => {
-        const categoryName = input.value.trim();
-
-        // Validate input
-        if (!categoryName) {
-          this.showError(errorElement, 'Please enter a category name');
-          return;
-        }
-
-        if (categoryName.length > 20) {
-          this.showError(errorElement, 'Category name too long (max 20 chars)');
-          return;
-        }
-
-        const categorySlug = categoryName.toLowerCase().replace(/\s+/g, '-');
-
-        if (this.categoryExists(categorySlug)) {
-          this.showError(errorElement, 'This category already exists');
-          return;
-        }
-
-        // Add the category
-        this.addCategory(categorySlug, categoryName);
-
-        // Close the modal
-        document.body.removeChild(modalOverlay);
-      };
-
-      // Set up event listeners
-      confirmBtn.addEventListener('click', handleAddCategory);
-
-      cancelBtn.addEventListener('click', () => {
-        document.body.removeChild(modalOverlay);
-      });
-
-      closeBtn.addEventListener('click', () => {
-        document.body.removeChild(modalOverlay);
-      });
-
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          handleAddCategory();
-        }
-      });
-
-      // Close when clicking outside modal
-      modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) {
-          document.body.removeChild(modalOverlay);
-        }
-      });
-    },
-
-    showError(element, message) {
-      element.textContent = message;
-      element.style.display = 'block';
-      setTimeout(() => {
-        element.style.display = 'none';
-      }, 3000);
-    },
-
-    categoryExists(slug) {
-      return !!document.querySelector(`[data-category="${slug}"]`);
-    },
-
-    addCategory(slug, name) {
-      const randomColor = this.categoryColors[
-        Math.floor(Math.random() * this.categoryColors.length)
-      ];
-
-      // Create list item
-      const listItem = document.createElement('li');
-      listItem.className = 'category-item';
-      listItem.dataset.category = slug;
-      listItem.innerHTML = `
-      <span class="category-color" style="background-color: ${randomColor};"></span>
-      <span class="category-name">${name}</span>
-      ${this.defaultCategories.includes(slug) ? '' : `
-        <button class="delete-category-btn" title="Delete category">
-          <i class="fas fa-times"></i>
-        </button>
-      `}
-    `;
-
-      // Add to sidebar list (before the add button)
-      this.categoryList.insertBefore(listItem, this.addCategoryBtn.parentNode);
-
-      // Add to both dropdowns
-      this.addToDropdown(this.taskCategorySelect, slug, name);
-      this.addToDropdown(this.editTaskCategorySelect, slug, name);
-
-      // Add delete handler if not default category
-      if (!this.defaultCategories.includes(slug)) {
-        listItem.querySelector('.delete-category-btn').addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (confirm(`Are you sure you want to delete the "${name}" category?`)) {
-            this.removeCategory(slug);
-          }
-        });
-      }
-    },
-
-    addToDropdown(select, value, text) {
-      const option = document.createElement('option');
-      option.value = value;
-      option.textContent = text;
-      select.appendChild(option);
-    },
-
-    removeCategory(slug) {
-      // Remove from list
-      const item = document.querySelector(`[data-category="${slug}"]`);
-      if (item) item.remove();
-
-      // Remove from dropdowns
-      this.removeFromDropdown(this.taskCategorySelect, slug);
-      this.removeFromDropdown(this.editTaskCategorySelect, slug);
-    },
-
-    removeFromDropdown(select, value) {
-      const option = select.querySelector(`option[value="${value}"]`);
-      if (option) option.remove();
-    }
-  };
-
-  // ======================
   // MODAL MANAGEMENT
   // ======================
   const modals = {
     openTaskDetailsModal(task) {
       state.currentEditTask = task;
       elements.editTaskTitle.value = task.text;
-      elements.editDueDate.value = task.dueDate || '';
+
+      // Set minimum date to today for edit modal
+      const today = new Date().toISOString().split('T')[0];
+      elements.editDueDate.setAttribute('min', today);
+
+      // If existing due date is in the past, set to today
+      if (task.dueDate && new Date(task.dueDate) < new Date()) {
+        elements.editDueDate.value = today;
+      } else {
+        elements.editDueDate.value = task.dueDate || today;
+      }
+
       elements.editTaskCategory.value = task.category || 'none';
+      elements.editTaskDescription.value = task.description || '';
 
       // Reset priority dots
       document.querySelectorAll('#task-details-modal .priority-dot').forEach(dot => {
@@ -570,7 +267,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
+      // Clear and repopulate subtasks
+      elements.subtasksList.innerHTML = '';
+      if (task.subtasks && task.subtasks.length > 0) {
+        task.subtasks.forEach(subtask => {
+          const subtaskItem = document.createElement('li');
+          subtaskItem.innerHTML = `
+            <span>${subtask.text}</span>
+            <button class="delete-subtask-btn"><i class="fas fa-trash"></i></button>
+          `;
+          elements.subtasksList.appendChild(subtaskItem);
+
+          // Add delete handler for subtasks
+          subtaskItem.querySelector('.delete-subtask-btn').addEventListener('click', () => {
+            subtaskItem.remove();
+          });
+        });
+      }
+
       elements.taskDetailsModal.style.display = 'flex';
+      setTimeout(() => {
+        elements.taskDetailsModal.querySelector('.modal-content').classList.add('active');
+      }, 10);
       themeManager.applyThemeToModal(themeManager.getCurrentTheme());
     },
 
@@ -583,16 +301,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     saveTaskChanges() {
       if (state.currentEditTask) {
+        // Validate date is not in the past
+        const selectedDate = new Date(elements.editDueDate.value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (selectedDate < today) {
+          alert("Please select a date from today onwards");
+          return;
+        }
+
+        const subtasks = Array.from(document.querySelectorAll('#subtasks-list li')).map(el => ({
+          text: el.querySelector('span').textContent,
+          completed: false
+        }));
+
         const updatedTask = {
           ...state.currentEditTask,
           text: elements.editTaskTitle.value,
+          description: elements.editTaskDescription.value,
           dueDate: elements.editDueDate.value,
-          category: elements.editTaskCategory.value,
-          priority: document.querySelector('#task-details-modal .priority-dot.active').dataset.priority
+          category: elements.editTaskCategory.value !== 'none' ? elements.editTaskCategory.value : null,
+          priority: document.querySelector('#task-details-modal .priority-dot.active').dataset.priority,
+          subtasks: subtasks
         };
 
         taskManager.updateTask(updatedTask);
-        elements.taskDetailsModal.style.display = 'none';
+        modals.closeModal(elements.taskDetailsModal);
         state.currentEditTask = null;
       }
     }
@@ -726,6 +461,31 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // Subtask Management
+    elements.addSubtaskBtn.addEventListener('click', () => {
+      const subtaskText = elements.newSubtaskInput.value.trim();
+      if (subtaskText) {
+        const subtaskItem = document.createElement('li');
+        subtaskItem.innerHTML = `
+          <span>${subtaskText}</span>
+          <button class="delete-subtask-btn"><i class="fas fa-trash"></i></button>
+        `;
+        elements.subtasksList.appendChild(subtaskItem);
+        elements.newSubtaskInput.value = '';
+
+        // Add delete handler for the new subtask
+        subtaskItem.querySelector('.delete-subtask-btn').addEventListener('click', () => {
+          subtaskItem.remove();
+        });
+      }
+    });
+
+    elements.newSubtaskInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        elements.addSubtaskBtn.click();
+      }
+    });
+
     // Theme Change Handlers
     if (elements.themeSelect) {
       elements.themeSelect.addEventListener('change', function () {
@@ -787,9 +547,14 @@ document.addEventListener('DOMContentLoaded', () => {
     themeManager.initializeTheme();
     taskManager.renderTasks();
     utils.updateTaskStats();
-    elements.dueDateInput.valueAsDate = new Date();
+
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    elements.dueDateInput.setAttribute('min', today);
+    elements.dueDateInput.value = today;
+    elements.editDueDate.setAttribute('min', today); // Also set for edit modal
+
     footerManager.init();
-    categoryManager.init();
     setupEventListeners();
   };
 
