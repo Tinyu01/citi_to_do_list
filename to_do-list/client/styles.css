@@ -1736,3 +1736,24 @@
 .subtask-item input[type="checkbox"] {
   margin-right: 0.5rem;
 }
+
+/* Add to styles.css */
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.delete-task {
+  background-color: var(--priority-high);
+  color: white;
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.delete-task:hover {
+  opacity: 0.9;
+}
