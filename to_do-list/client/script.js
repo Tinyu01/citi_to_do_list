@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dueDateInput: document.getElementById('due-date'),
     taskCategorySelect: document.getElementById('task-category'),
     priorityDots: document.querySelectorAll('.priority-selector .priority-dot'),
+    taskDescription: document.getElementById('task-description'),
 
     // Task List Containers
     tasksList: document.getElementById('tasks-list'),
@@ -107,21 +108,65 @@ document.addEventListener('DOMContentLoaded', () => {
       taskItem.className = `task-item priority-${task.priority} ${task.completed ? 'completed' : ''}`;
       taskItem.dataset.id = task.id;
       taskItem.innerHTML = `
-        <div class="task-checkbox">
-          <input type="checkbox" ${task.completed ? 'checked' : ''}>
-        </div>
-        <div class="task-content">
+      <div class="task-checkbox">
+        <input type="checkbox" ${task.completed ? 'checked' : ''}>
+      </div>
+      <div class="task-content">
+        <div class="task-header">
           <div class="task-title">${task.text}</div>
-          <div class="task-meta">
-            <span class="task-category ${task.category}">${task.category || 'No Category'}</span>
-            <span class="task-date">${task.dueDate || 'No Due Date'}</span>
+          <div class="task-priority priority-${task.priority}">
+            <span class="priority-dot ${task.priority}" title="${task.priority} priority"></span>
           </div>
         </div>
-        <div class="task-actions">
-          <button class="edit-task-btn"><i class="fas fa-edit"></i></button>
-          <button class="delete-task-btn"><i class="fas fa-trash"></i></button>
+        ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
+        <div class="task-meta">
+          <span class="task-category ${task.category}">${task.category || 'No Category'}</span>
+          <span class="task-date">${task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No Due Date'}</span>
         </div>
-      `;
+        ${task.subtasks && task.subtasks.length > 0 ? `
+          <div class="subtasks-container">
+            <button class="toggle-subtasks-btn">
+              <i class="fas fa-chevron-down"></i>
+              <span>${task.subtasks.length} subtask${task.subtasks.length !== 1 ? 's' : ''}</span>
+            </button>
+            <ul class="subtasks-list" style="display: none;">
+              ${task.subtasks.map(subtask => `
+                <li class="subtask-item ${subtask.completed ? 'completed' : ''}">
+                  <input type="checkbox" ${subtask.completed ? 'checked' : ''}>
+                  <span>${subtask.text}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        ` : ''}
+      </div>
+      <div class="task-actions">
+        <button class="edit-task-btn" title="Edit task"><i class="fas fa-edit"></i></button>
+        <button class="delete-task-btn" title="Delete task"><i class="fas fa-trash"></i></button>
+      </div>
+    `;
+
+    // Add this after creating the task element
+if (task.subtasks && task.subtasks.length > 0) {
+  const toggleBtn = taskItem.querySelector('.toggle-subtasks-btn');
+  const subtasksList = taskItem.querySelector('.subtasks-list');
+  
+  toggleBtn.addEventListener('click', () => {
+    const isHidden = subtasksList.style.display === 'none';
+    subtasksList.style.display = isHidden ? 'block' : 'none';
+    toggleBtn.querySelector('i').className = isHidden 
+      ? 'fas fa-chevron-up' 
+      : 'fas fa-chevron-down';
+  });
+  
+  // Add event listeners for subtask checkboxes
+  taskItem.querySelectorAll('.subtask-item input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      const subtaskItem = this.closest('.subtask-item');
+      subtaskItem.classList.toggle('completed', this.checked);
+    });
+  });
+}
 
       // Add event listeners to the task element
       const checkbox = taskItem.querySelector('.task-checkbox input');
@@ -175,12 +220,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addTask() {
       const taskText = elements.newTaskInput.value.trim();
+      const taskDescription = elements.taskDescription.value.trim();
+      const subtasks = Array.from(document.querySelectorAll('#subtasks-list li')).map(el => ({
+        text: el.querySelector('span').textContent,
+        completed: false
+      }));
+
       if (!taskText) return;
 
       // Validate date is not in the past
       const selectedDate = new Date(elements.dueDateInput.value);
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Compare only dates, not times
+      today.setHours(0, 0, 0, 0);
 
       if (selectedDate < today) {
         alert("Please select a date from today onwards");
@@ -190,12 +241,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const newTask = {
         id: Date.now(),
         text: taskText,
+        description: taskDescription || null,
         completed: false,
         category: elements.taskCategorySelect.value !== 'none' ? elements.taskCategorySelect.value : null,
         dueDate: elements.dueDateInput.value || null,
         priority: state.selectedPriority,
-        description: '', // Initialize with empty description
-        subtasks: [], // Initialize with empty subtasks array
+        subtasks: subtasks,
         createdAt: new Date().toISOString()
       };
 
@@ -205,11 +256,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Reset form
       elements.newTaskInput.value = '';
+      elements.taskDescription.value = '';
       elements.taskCategorySelect.value = 'none';
       elements.dueDateInput.value = '';
       document.querySelector('.priority-dot.active').classList.remove('active');
       document.querySelector('.priority-dot[data-priority="low"]').classList.add('active');
       state.selectedPriority = 'low';
+      elements.subtasksList.innerHTML = '';
     },
 
     toggleTaskCompletion(taskId) {
