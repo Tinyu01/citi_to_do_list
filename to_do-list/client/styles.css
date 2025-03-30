@@ -471,8 +471,15 @@
   }
   
   .chart-container {
-    height: 250px;
     position: relative;
+    height: 300px;
+    width: 100%;
+    margin-bottom: var(--spacing-md);
+  }
+
+  #task-completion-chart {
+    width: 100%;
+    height: 100%;
   }
   
   .chart-controls {
@@ -480,6 +487,7 @@
     justify-content: center;
     gap: var(--spacing-md);
     margin-top: var(--spacing-md);
+    margin-top: -0.1%;
   }
   
   .chart-btn {
@@ -513,14 +521,33 @@
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--border-radius-sm);
     box-shadow: var(--shadow-sm);
-    transition: background-color var(--transition-normal);
+    transition: background-color var(--transition-normal), box-shadow var(--transition-fast);
   }
   
   .search-container input {
+    flex: 1;
     border: none;
     background-color: transparent;
     color: var(--text);
     outline: none;
+    font-size: 1rem;
+  }
+  
+  .search-container input::placeholder {
+    color: var(--text-secondary);
+  }
+  
+  .search-container button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+  }
+  
+  .search-container button:hover {
+    color: var(--accent);
   }
   
   .filter-container {
@@ -656,6 +683,26 @@
     margin-bottom: var(--spacing-md);
   }
   
+  .calendar-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+  
+  .calendar-header button {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
+  }
+  
+  .calendar-header button:hover {
+    background-color: var(--hover);
+  }
+  
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -664,16 +711,57 @@
   
   .calendar-day {
     aspect-ratio: 1;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--border-radius-sm);
     transition: all var(--transition-fast);
   }
   
-  .calendar-day:hover {
+  .calendar-day.empty {
+    background-color: transparent;
+    border: none;
+  }
+  
+  .calendar-day:hover:not(.empty) {
     background-color: var(--hover);
+    cursor: pointer;
+  }
+  
+  .calendar-day.today {
+    border-color: var(--accent);
+  }
+  
+  .day-number {
+    font-weight: bold;
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .day-tasks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-top: auto;
+  }
+  
+  .task-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  
+  .task-dot.priority-high {
+    background-color: var(--priority-high);
+  }
+  
+  .task-dot.priority-medium {
+    background-color: var(--priority-medium);
+  }
+  
+  .task-dot.priority-low {
+    background-color: var(--priority-low);
   }
   
   /* Empty State Styles */
@@ -1735,4 +1823,30 @@
 
 .subtask-item input[type="checkbox"] {
   margin-right: 0.5rem;
+}
+
+/* Add to styles.css */
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.delete-task {
+  background-color: var(--priority-high);
+  color: white;
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.delete-task:hover {
+  opacity: 0.9;
+}
+
+.filter-btn.active {
+  background-color: var(--accent);
+  color: white;
 }

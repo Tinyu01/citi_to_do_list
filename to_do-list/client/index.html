@@ -128,8 +128,8 @@
         <div class="top-actions">
           <div class="search-container">
             <i class="fas fa-search"></i>
-            <input type="text" id="search" placeholder="Search tasks...">
-            <button id="voice-search" class="icon-btn">
+            <input type="text" id="search" placeholder="Search tasks..." aria-label="Search tasks">
+            <button id="voice-search" class="icon-btn" aria-label="Voice search">
               <i class="fas fa-microphone"></i>
             </button>
           </div>
@@ -254,20 +254,20 @@
           <div class="task-edit-form">
             <div class="form-group">
               <label for="edit-task-title">Title</label>
-              <input type="text" id="edit-task-title">
+              <input type="text" id="edit-task-title" placeholder="Add a new task" required>
             </div>
             <div class="form-group">
-              <label for="edit-task-description">Description</label>
-              <textarea id="edit-task-description" rows="3"></textarea>
+              <label for="edit-task-description">Description (Optional)</label>
+              <textarea id="edit-task-description" rows="3" placeholder="Add a description"></textarea>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label for="edit-due-date">Due Date</label>
-                <input type="date" id="edit-due-date" min="">
+                <input type="date" id="edit-due-date" min="" required>
               </div>
               <div class="form-group">
                 <label for="edit-task-category">Category</label>
-                <select id="edit-task-category">
+                <select id="edit-task-category" required>
                   <option value="none">Select Category</option>
                   <option value="work">Work</option>
                   <option value="personal">Personal</option>
@@ -284,7 +284,7 @@
               </div>
             </div>
             <div class="form-group">
-              <label>Subtasks</label>
+              <label>Subtasks (Optional)</label>
               <ul id="subtasks-list"></ul>
               <div class="add-subtask">
                 <input type="text" id="new-subtask" placeholder="Add subtask">
@@ -295,7 +295,7 @@
         </div>
         <div class="modal-footer">
           <button class="delete-task" id="delete-task-btn">Delete</button>
-          <button class="save-task" id="save-task-btn">Save Changes</button>
+          <button class="save-task" id="save-task-btn">Save Task</button>
         </div>
       </div>
     </div>
@@ -493,8 +493,7 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.7.0/chart.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
   <script src="charts.js"></script>
 </body>
