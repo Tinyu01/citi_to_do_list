@@ -1757,3 +1757,8 @@
 .delete-task:hover {
   opacity: 0.9;
 }
+
+.filter-btn.active {
+  background-color: var(--accent);
+  color: white;
+}

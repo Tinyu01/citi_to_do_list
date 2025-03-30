@@ -64,7 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Calendar View Elements
     calendarViewBtn: document.getElementById('calender-view-btn'),
-    calendarView: document.querySelector('.calendar-view')
+    calendarView: document.querySelector('.calendar-view'),
+
+    // Sort Select Element
+    sortSelect: document.getElementById('sort-select')
   };
 
   // Ensure list view is shown by default
@@ -77,7 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const state = {
     tasks: JSON.parse(localStorage.getItem('tasks')) || [],
     selectedPriority: 'low',
-    currentEditTask: null
+    currentEditTask: null,
+    currentFilter: 'all' // Add this line
   };
 
   // ======================
@@ -185,6 +189,40 @@ if (task.subtasks && task.subtasks.length > 0) {
       });
 
       return taskItem;
+    },
+
+    sortTasks(tasks, sortBy) {
+      const sortedTasks = [...tasks];
+      
+      switch(sortBy) {
+        case 'date-asc':
+          return sortedTasks.sort((a, b) => {
+            const dateA = a.dueDate ? new Date(a.dueDate) : new Date('9999-12-31'); // Future date for tasks without due date
+            const dateB = b.dueDate ? new Date(b.dueDate) : new Date('9999-12-31');
+            return dateA - dateB;
+          });
+          
+        case 'date-desc':
+          return sortedTasks.sort((a, b) => {
+            const dateA = a.dueDate ? new Date(a.dueDate) : new Date(0); // Epoch for tasks without due date
+            const dateB = b.dueDate ? new Date(b.dueDate) : new Date(0);
+            return dateB - dateA;
+          });
+          
+        case 'priority':
+          const priorityOrder = { high: 3, medium: 2, low: 1 };
+          return sortedTasks.sort((a, b) => {
+            return priorityOrder[b.priority] - priorityOrder[a.priority];
+          });
+          
+        case 'alphabetical':
+          return sortedTasks.sort((a, b) => {
+            return a.text.localeCompare(b.text);
+          });
+          
+        default:
+          return sortedTasks;
+      }
     }
   };
 
@@ -192,19 +230,47 @@ if (task.subtasks && task.subtasks.length > 0) {
   // TASK MANAGEMENT
   // ======================
   const taskManager = {
+    filterTasks() {
+      const today = new Date().toISOString().split('T')[0];
+      
+      return state.tasks.filter(task => {
+        switch (state.currentFilter) {
+          case 'pending':
+            return !task.completed;
+          case 'completed':
+            return task.completed;
+          case 'priority':
+            return task.priority === 'high' || task.priority === 'medium';
+          case 'today':
+            return task.dueDate === today;
+          default:
+            return true; // 'all' filter
+        }
+      });
+    },
+
     renderTasks() {
       // Clear existing lists
       [elements.tasksList, elements.todoList, elements.inProgressList, elements.completedList]
         .forEach(list => list.innerHTML = '');
 
-      if (state.tasks.length === 0) {
+      // Get filtered tasks
+      const filteredTasks = this.filterTasks();
+      
+      // Get sort option
+      const sortBy = elements.sortSelect.value;
+      
+      // Sort the filtered tasks
+      const sortedTasks = utils.sortTasks(filteredTasks, sortBy);
+
+      if (sortedTasks.length === 0) {
         elements.emptyState.style.display = 'flex';
         return;
       }
 
       elements.emptyState.style.display = 'none';
 
-      state.tasks.forEach(task => {
+      sortedTasks.forEach(task => {
         const taskElement = utils.createTaskElement(task);
 
         // Render in multiple views
@@ -624,6 +690,27 @@ if (task.subtasks && task.subtasks.length > 0) {
             views[i].style.display = 'none';
           }
         });
+      });
+    });
+
+    // Sort selection
+    elements.sortSelect.addEventListener('change', () => {
+      taskManager.renderTasks();
+    });
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Remove active class from all buttons
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        // Add active class to clicked button
+        btn.classList.add('active');
+        
+        // Update filter state
+        state.currentFilter = btn.dataset.filter;
+        
+        // Re-render tasks
+        taskManager.renderTasks();
       });
     });
   };
