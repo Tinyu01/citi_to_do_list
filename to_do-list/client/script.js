@@ -296,8 +296,8 @@ if (task.subtasks && task.subtasks.length > 0) {
   const modals = {
     openTaskDetailsModal(task) {
       state.currentEditTask = task;
-      elements.editTaskTitle.value = task.text;
-
+      elements.editTaskTitle.value = task.text || '';
+      
       // Set minimum date to today for edit modal
       const today = new Date().toISOString().split('T')[0];
       elements.editDueDate.setAttribute('min', today);
@@ -315,7 +315,7 @@ if (task.subtasks && task.subtasks.length > 0) {
       // Reset priority dots
       document.querySelectorAll('#task-details-modal .priority-dot').forEach(dot => {
         dot.classList.remove('active');
-        if (dot.dataset.priority === task.priority) {
+        if (dot.dataset.priority === (task.priority || 'low')) {
           dot.classList.add('active');
         }
       });
@@ -338,6 +338,13 @@ if (task.subtasks && task.subtasks.length > 0) {
         });
       }
 
+      // Show/hide delete button based on whether this is a new task or existing one
+      elements.deleteTaskBtn.style.display = state.currentEditTask ? 'block' : 'none';
+      
+      // Update modal title
+      const modalTitle = elements.taskDetailsModal.querySelector('.modal-header h2');
+      modalTitle.textContent = state.currentEditTask ? 'Task Details' : 'Add New Task';
+
       elements.taskDetailsModal.style.display = 'flex';
       setTimeout(() => {
         elements.taskDetailsModal.querySelector('.modal-content').classList.add('active');
@@ -353,36 +360,45 @@ if (task.subtasks && task.subtasks.length > 0) {
     },
 
     saveTaskChanges() {
-      if (state.currentEditTask) {
-        // Validate date is not in the past
-        const selectedDate = new Date(elements.editDueDate.value);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+      const subtasks = Array.from(document.querySelectorAll('#subtasks-list li')).map(el => ({
+        text: el.querySelector('span').textContent,
+        completed: false
+      }));
 
-        if (selectedDate < today) {
-          alert("Please select a date from today onwards");
-          return;
-        }
+      // Validate date is not in the past
+      const selectedDate = new Date(elements.editDueDate.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-        const subtasks = Array.from(document.querySelectorAll('#subtasks-list li')).map(el => ({
-          text: el.querySelector('span').textContent,
-          completed: false
-        }));
-
-        const updatedTask = {
-          ...state.currentEditTask,
-          text: elements.editTaskTitle.value,
-          description: elements.editTaskDescription.value,
-          dueDate: elements.editDueDate.value,
-          category: elements.editTaskCategory.value !== 'none' ? elements.editTaskCategory.value : null,
-          priority: document.querySelector('#task-details-modal .priority-dot.active').dataset.priority,
-          subtasks: subtasks
-        };
-
-        taskManager.updateTask(updatedTask);
-        modals.closeModal(elements.taskDetailsModal);
-        state.currentEditTask = null;
+      if (selectedDate < today) {
+        alert("Please select a date from today onwards");
+        return;
       }
+
+      const taskData = {
+        id: state.currentEditTask ? state.currentEditTask.id : Date.now(),
+        text: elements.editTaskTitle.value,
+        description: elements.editTaskDescription.value,
+        dueDate: elements.editDueDate.value,
+        category: elements.editTaskCategory.value !== 'none' ? elements.editTaskCategory.value : null,
+        priority: document.querySelector('#task-details-modal .priority-dot.active').dataset.priority,
+        subtasks: subtasks,
+        completed: false,
+        createdAt: new Date().toISOString()
+      };
+
+      if (state.currentEditTask) {
+        // Update existing task
+        taskManager.updateTask(taskData);
+      } else {
+        // Add new task
+        state.tasks.unshift(taskData);
+        utils.saveTasksToLocalStorage();
+        taskManager.renderTasks();
+      }
+
+      modals.closeModal(elements.taskDetailsModal);
+      state.currentEditTask = null;
     }
   };
 
@@ -475,7 +491,26 @@ if (task.subtasks && task.subtasks.length > 0) {
   const setupEventListeners = () => {
     // Task Management
     elements.addTaskBtn.addEventListener('click', () => taskManager.addTask());
-    elements.emptyAddTaskBtn.addEventListener('click', () => taskManager.addTask());
+    elements.emptyAddTaskBtn.addEventListener('click', () => {
+      // Create a new empty task object
+      const newTask = {
+        id: Date.now(),
+        text: '',
+        completed: false,
+        category: null,
+        dueDate: new Date().toISOString().split('T')[0], // Today's date
+        priority: 'low',
+        description: '',
+        subtasks: []
+      };
+      
+      // Open the modal with this empty task
+      modals.openTaskDetailsModal(newTask);
+      
+      // Set the modal to "add mode" rather than "edit mode"
+      state.currentEditTask = null;
+      elements.deleteTaskBtn.style.display = 'none'; // Hide delete button for new tasks
+    });
     elements.newTaskInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') taskManager.addTask();
     });
@@ -613,3 +648,4 @@ if (task.subtasks && task.subtasks.length > 0) {
 
   init();
 });
+
