@@ -342,6 +342,56 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     },
+
+    getProductivityData: function (timeRange = 'weekly') {
+      const now = new Date();
+      const tasks = state.tasks;
+
+      if (timeRange === 'weekly') {
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const completed = [0, 0, 0, 0, 0, 0, 0];
+        const created = [0, 0, 0, 0, 0, 0, 0];
+
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        tasks.forEach(task => {
+          const taskDate = new Date(task.createdAt);
+          if (taskDate >= oneWeekAgo) {
+            const day = taskDate.getDay();
+            created[day]++;
+            if (task.completed) completed[day]++;
+          }
+        });
+
+        return {
+          labels: days,
+          completed: completed,
+          created: created
+        };
+      } else { // monthly
+        const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+        const completed = [0, 0, 0, 0];
+        const created = [0, 0, 0, 0];
+
+        tasks.forEach(task => {
+          const taskDate = new Date(task.createdAt);
+          if (taskDate.getMonth() === now.getMonth() && taskDate.getFullYear() === now.getFullYear()) {
+            const week = Math.floor((taskDate.getDate() - 1) / 7);
+            if (week >= 0 && week < 4) {
+              created[week]++;
+              if (task.completed) completed[week]++;
+            }
+          }
+        });
+
+        return {
+          labels: weeks,
+          completed: completed,
+          created: created
+        };
+      }
+    }
   };
 
   // ======================
@@ -397,6 +447,21 @@ document.addEventListener('DOMContentLoaded', () => {
           elements.todoList.appendChild(taskElement.cloneNode(true));
         }
       });
+
+      // Update the chart
+      if (window.productivityChart) {
+        const activeChartBtn = document.querySelector('.chart-btn.active');
+        if (activeChartBtn) {
+          const data = utils.getProductivityData(activeChartBtn.dataset.chart);
+          window.productivityChart.data.labels = data.labels;
+          window.productivityChart.data.datasets[0].data = data.completed;
+          window.productivityChart.data.datasets[1].data = data.created;
+          window.productivityChart.update();
+        }
+      }
+
+      // Dispatch event to update chart
+      document.dispatchEvent(new CustomEvent('tasksUpdated'));
     },
 
     addTask() {
@@ -831,6 +896,14 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         alert('Voice search is not supported in your browser');
       }
+    });
+
+    document.addEventListener('requestProductivityData', (e) => {
+      const data = utils.getProductivityData(e.detail.timeRange);
+      const responseEvent = new CustomEvent('productivityDataResponse', {
+        detail: { data }
+      });
+      document.dispatchEvent(responseEvent);
     });
   };
 
