@@ -229,47 +229,6 @@
     transition: color var(--transition-fast);
   }
   
-  .responsive-logo {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-  }
-
-  .responsive-logo i {
-    font-size: 1.8rem;
-  }
-
-  .responsive-logo h1 {
-    font-size: 1.5rem;
-    font-weight: 600;
-  }
-
-  /* Adjust logo for smaller screens */
-  @media (max-width: 768px) {
-    .responsive-logo i {
-      font-size: 1.5rem;
-    }
-
-    .responsive-logo h1 {
-      font-size: 1.2rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .responsive-logo {
-      flex-direction: column;
-      text-align: center;
-    }
-
-    .responsive-logo i {
-      font-size: 1.2rem;
-    }
-
-    .responsive-logo h1 {
-      font-size: 1rem;
-    }
-  }
-
   .header-actions {
     display: flex;
     align-items: center;
@@ -817,6 +776,8 @@
   }
   
   .empty-image {
+    width: 100%; /* Set a fixed width for the image */
+    height: 100px; /* Set a fixed height for the image */
     margin-bottom: var(--spacing-md);
   }
   
@@ -1890,4 +1851,45 @@
 .filter-btn.active {
   background-color: var(--accent);
   color: white;
+}
+
+.responsive-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.responsive-logo i {
+  font-size: 1.8rem;
+}
+
+.responsive-logo h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Adjust logo for smaller screens */
+@media (max-width: 768px) {
+  .responsive-logo i {
+    font-size: 1.5rem;
+  }
+
+  .responsive-logo h1 {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-logo {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .responsive-logo i {
+    font-size: 1.2rem;
+  }
+
+  .responsive-logo h1 {
+    font-size: 1rem;
+  }
 }
