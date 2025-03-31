@@ -1,6 +1,6 @@
 # TaskFlow - Modern Task Management Application
 
-![TaskFlow Screenshot](https://via.placeholder.com/800x400?text=TaskFlow+Screenshot)
+![TaskFlow Screenshot](/to_do-list/client/assets/Screenshot%202025-03-30%20163613.jpg)
 
 A feature-rich, modern task management application with productivity tracking, multiple views, and theme customization.
 
@@ -132,10 +132,12 @@ Contributions are welcome! Please follow these steps:
 ## 📜 License
 Distributed under the MIT License. See `LICENSE` for more information.
 
-## 📬 Contact
-**MASINGITA OTTIS MALULEKE**  
-[Your Email]  
-[Your Twitter Handle]  
+## 📞 Contact Me
+**MASINGITA OTTIS MALULEKE** 
+- **Address**: 1738, San Street, Braamfischerville, Roodepoort, 1724
+- **Mobile**: 0738847449
+- **Email**: masingita.maluleke@capaciti.org.za / 216135982@edu.vut.ac.za
+- **LinkedIn**: [LinkedIn Profile](https://www.linkedin.com/in/thefreelancer201) 
 
 **Project Link:** [https://tinyu01.github.io/citi_to_do_list/to_do-list/client/](https://github.com/Tinyu01/citi_to_do_list)
 
