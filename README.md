@@ -1,6 +1,6 @@
 # TaskFlow - Modern Task Management Application
 
-![TaskFlow Screenshot](https://via.placeholder.com/800x400?text=TaskFlow+Screenshot)
+![TaskFlow Screenshot](/to_do-list/client/assets/Screenshot%202025-03-30%20163613.jpg)
 
 A feature-rich, modern task management application with productivity tracking, multiple views, and theme customization.
 
