@@ -1850,3 +1850,44 @@
   background-color: var(--accent);
   color: white;
 }
+
+.responsive-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.responsive-logo i {
+  font-size: 1.8rem;
+}
+
+.responsive-logo h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Adjust logo for smaller screens */
+@media (max-width: 768px) {
+  .responsive-logo i {
+    font-size: 1.5rem;
+  }
+
+  .responsive-logo h1 {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-logo {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .responsive-logo i {
+    font-size: 1.2rem;
+  }
+
+  .responsive-logo h1 {
+    font-size: 1rem;
+  }
+}
