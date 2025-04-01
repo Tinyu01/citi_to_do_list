@@ -118,10 +118,14 @@ document.addEventListener('DOMContentLoaded', () => {
     async fetchTasks() {
       try {
         const response = await fetch('http://localhost:5000/api/tasks');
-        return await response.json();
+        if (!response.ok) {
+          throw new Error(`Failed to fetch tasks: ${response.statusText}`);
+        }
+        const tasks = await response.json();
+        return Array.isArray(tasks) ? tasks : []; // Ensure tasks is always an array
       } catch (err) {
         console.error('Error fetching tasks:', err);
-        return [];
+        return []; // Return an empty array on error
       }
     },
 
@@ -138,6 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
     async updateTaskStats() {
       try {
         const tasks = await this.fetchTasks();
+        if (!Array.isArray(tasks)) {
+          throw new Error('Invalid tasks data');
+        }
         const totalTasks = tasks.length;
         const completedTasks = tasks.filter(task => task.completed).length;
         const pendingTasks = totalTasks - completedTasks;
@@ -435,9 +442,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // ======================
   const taskManager = {
     async filterTasks() {
-      const today = new Date().toISOString().split('T')[0];
       try {
+        const today = new Date().toISOString().split('T')[0];
         const tasks = await utils.fetchTasks();
+        if (!Array.isArray(tasks)) {
+          throw new Error('Invalid tasks data');
+        }
         let filteredTasks = tasks.filter(task => {
           switch (state.currentFilter) {
             case 'pending': return !task.completed;
@@ -454,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return filteredTasks;
       } catch (err) {
         console.error('Error filtering tasks:', err);
-        return [];
+        return []; // Return an empty array on error
       }
     },
 

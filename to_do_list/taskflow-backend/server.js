@@ -22,9 +22,10 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.get('/api/tasks', async (req, res) => {
   try {
     const tasks = await Task.find();
-    res.json(tasks);
+    res.json(tasks); // Ensure tasks is always an array
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error fetching tasks:', err); // Log the error for debugging
+    res.status(500).json({ message: 'Failed to fetch tasks' });
   }
 });
 
