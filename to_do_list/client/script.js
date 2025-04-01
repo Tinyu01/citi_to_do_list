@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // APPLICATION STATE
   // ======================
   const state = {
-    tasks: JSON.parse(localStorage.getItem('tasks')) || [],
+    tasks: [],
     selectedPriority: 'low',
     currentEditTask: null,
     currentFilter: 'all',
@@ -99,23 +99,59 @@ document.addEventListener('DOMContentLoaded', () => {
   // UTILITY FUNCTIONS
   // ======================
   const utils = {
-    saveTasksToLocalStorage() {
-      localStorage.setItem('tasks', JSON.stringify(state.tasks));
-      this.updateTaskStats();
+    async saveTask(task) {
+      try {
+        const method = task.id ? 'PUT' : 'POST';
+        const url = task.id ? `http://localhost:5000/api/tasks/${task.id}` : 'http://localhost:5000/api/tasks';
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(task),
+        });
+        return await response.json();
+      } catch (err) {
+        console.error('Error saving task:', err);
+        throw err;
+      }
     },
 
-    updateTaskStats() {
-      const totalTasks = state.tasks.length;
-      const completedTasks = state.tasks.filter(task => task.completed).length;
-      const pendingTasks = totalTasks - completedTasks;
-      const productivityScore = totalTasks > 0
-        ? Math.round((completedTasks / totalTasks) * 100)
-        : 0;
+    async fetchTasks() {
+      try {
+        const response = await fetch('http://localhost:5000/api/tasks');
+        return await response.json();
+      } catch (err) {
+        console.error('Error fetching tasks:', err);
+        return [];
+      }
+    },
 
-      elements.totalTasks.textContent = totalTasks;
-      elements.completedTasks.textContent = completedTasks;
-      elements.pendingTasks.textContent = pendingTasks;
-      elements.productivityScore.textContent = `${productivityScore}%`;
+    async deleteTask(id) {
+      try {
+        await fetch(`http://localhost:5000/api/tasks/${id}`, { method: 'DELETE' });
+        return true;
+      } catch (err) {
+        console.error('Error deleting task:', err);
+        return false;
+      }
+    },
+
+    async updateTaskStats() {
+      try {
+        const tasks = await this.fetchTasks();
+        const totalTasks = tasks.length;
+        const completedTasks = tasks.filter(task => task.completed).length;
+        const pendingTasks = totalTasks - completedTasks;
+        const productivityScore = totalTasks > 0
+          ? Math.round((completedTasks / totalTasks) * 100)
+          : 0;
+
+        elements.totalTasks.textContent = totalTasks;
+        elements.completedTasks.textContent = completedTasks;
+        elements.pendingTasks.textContent = pendingTasks;
+        elements.productivityScore.textContent = `${productivityScore}%`;
+      } catch (err) {
+        console.error('Error updating stats:', err);
+      }
     },
 
     createTaskElement(task) {
@@ -398,43 +434,34 @@ document.addEventListener('DOMContentLoaded', () => {
   // TASK MANAGEMENT
   // ======================
   const taskManager = {
-    filterTasks() {
+    async filterTasks() {
       const today = new Date().toISOString().split('T')[0];
-      
-      // First apply the main filter
-      let filteredTasks = state.tasks.filter((task) => {
-        switch (state.currentFilter) {
-          case 'pending':
-            return !task.completed;
-          case 'completed':
-            return task.completed;
-          case 'priority':
-            return task.priority === 'high' || task.priority === 'medium';
-          case 'today':
-            return task.dueDate === today;
-          case 'date':
-            return task.dueDate === state.currentFilterDate;
-          default:
-            return true;
+      try {
+        const tasks = await utils.fetchTasks();
+        let filteredTasks = tasks.filter(task => {
+          switch (state.currentFilter) {
+            case 'pending': return !task.completed;
+            case 'completed': return task.completed;
+            case 'priority': return task.priority === 'high' || task.priority === 'medium';
+            case 'today': return task.dueDate && new Date(task.dueDate).toISOString().split('T')[0] === today;
+            case 'date': return task.dueDate && new Date(task.dueDate).toISOString().split('T')[0] === state.currentFilterDate;
+            default: return true;
+          }
+        });
+        if (state.searchQuery) {
+          filteredTasks = utils.searchTasks(filteredTasks, state.searchQuery);
         }
-      });
-      
-      // Then apply search if there's a query
-      if (state.searchQuery) {
-        filteredTasks = utils.searchTasks(filteredTasks, state.searchQuery);
+        return filteredTasks;
+      } catch (err) {
+        console.error('Error filtering tasks:', err);
+        return [];
       }
-      
-      return filteredTasks;
     },
 
-    renderTasks() {
-      [elements.tasksList, elements.todoList, elements.inProgressList, elements.completedList]
-        .forEach(list => list.innerHTML = '');
-
-      const filteredTasks = this.filterTasks();
-      
+    async renderTasks() {
+      [elements.tasksList, elements.todoList, elements.inProgressList, elements.completedList].forEach(list => list.innerHTML = '');
+      const filteredTasks = await this.filterTasks();
       const sortBy = elements.sortSelect.value;
-      
       const sortedTasks = utils.sortTasks(filteredTasks, sortBy);
 
       if (sortedTasks.length === 0) {
@@ -443,12 +470,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       elements.emptyState.style.display = 'none';
-
       sortedTasks.forEach(task => {
         const taskElement = utils.createTaskElement(task);
-
         elements.tasksList.appendChild(taskElement);
-
         if (task.completed) {
           elements.completedList.appendChild(taskElement.cloneNode(true));
         } else {
@@ -468,11 +492,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Dispatch event to update chart
       document.dispatchEvent(new CustomEvent('tasksUpdated'));
     },
 
-    addTask() {
+    async addTask() {
       const taskText = elements.newTaskInput.value.trim();
       const taskDescription = elements.taskDescription.value.trim();
       const subtasks = Array.from(document.querySelectorAll('#subtasks-list li')).map(el => ({
@@ -484,7 +507,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-
       const selectedDate = new Date(elements.dueDateInput.value);
       selectedDate.setHours(0, 0, 0, 0);
 
@@ -494,7 +516,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const newTask = {
-        id: Date.now(),
         text: taskText,
         description: taskDescription || null,
         completed: false,
@@ -505,42 +526,56 @@ document.addEventListener('DOMContentLoaded', () => {
         createdAt: new Date().toISOString()
       };
 
-      state.tasks.unshift(newTask);
-      utils.saveTasksToLocalStorage();
-      this.renderTasks();
-
-      elements.newTaskInput.value = '';
-      elements.taskDescription.value = '';
-      elements.taskCategorySelect.value = 'none';
-      elements.dueDateInput.value = today.toISOString().split('T')[0];
-      document.querySelector('.priority-dot.active').classList.remove('active');
-      document.querySelector('.priority-dot[data-priority="low"]').classList.add('active');
-      state.selectedPriority = 'low';
-      elements.subtasksList.innerHTML = '';
+      try {
+        await utils.saveTask(newTask);
+        this.renderTasks();
+        elements.newTaskInput.value = '';
+        elements.taskDescription.value = '';
+        elements.taskCategorySelect.value = 'none';
+        elements.dueDateInput.value = today.toISOString().split('T')[0];
+        document.querySelector('.priority-dot.active').classList.remove('active');
+        document.querySelector('.priority-dot[data-priority="low"]').classList.add('active');
+        state.selectedPriority = 'low';
+        elements.subtasksList.innerHTML = '';
+      } catch (err) {
+        console.error('Error adding task:', err);
+        alert('Failed to add task. Please try again.');
+      }
     },
 
-    toggleTaskCompletion(taskId) {
-      state.tasks = state.tasks.map(task =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
-      );
-      utils.saveTasksToLocalStorage();
-      this.renderTasks();
+    async toggleTaskCompletion(taskId) {
+      try {
+        const task = state.tasks.find(t => t.id === taskId);
+        if (!task) return;
+        const updatedTask = { ...task, completed: !task.completed };
+        await utils.saveTask(updatedTask);
+        this.renderTasks();
+      } catch (err) {
+        console.error('Error toggling task completion:', err);
+      }
     },
 
-    deleteTask(taskId) {
+    async deleteTask(taskId) {
       if (!confirm('Are you sure you want to delete this task?')) return;
-
-      state.tasks = state.tasks.filter(task => task.id !== taskId);
-      utils.saveTasksToLocalStorage();
-      this.renderTasks();
+      try {
+        const success = await utils.deleteTask(taskId);
+        if (success) {
+          this.renderTasks();
+        }
+      } catch (err) {
+        console.error('Error deleting task:', err);
+        alert('Failed to delete task. Please try again.');
+      }
     },
 
-    updateTask(updatedTask) {
-      state.tasks = state.tasks.map(task =>
-        task.id === updatedTask.id ? updatedTask : task
-      );
-      utils.saveTasksToLocalStorage();
-      this.renderTasks();
+    async updateTask(updatedTask) {
+      try {
+        await utils.saveTask(updatedTask);
+        this.renderTasks();
+      } catch (err) {
+        console.error('Error updating task:', err);
+        alert('Failed to update task. Please try again.');
+      }
     }
   };
 
@@ -639,7 +674,7 @@ document.addEventListener('DOMContentLoaded', () => {
         taskManager.updateTask(taskData);
       } else {
         state.tasks.unshift(taskData);
-        utils.saveTasksToLocalStorage();
+        utils.saveTask(taskData);
         taskManager.renderTasks();
       }
 
@@ -984,8 +1019,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ======================
   // INITIALIZATION
   // ======================
-  const init = () => {
+  const init = async () => {
     themeManager.initializeTheme();
+    state.tasks = await utils.fetchTasks();
     taskManager.renderTasks();
     utils.updateTaskStats();
     utils.renderCalendar();
