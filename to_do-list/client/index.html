@@ -6,13 +6,214 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TaskFlow | Modern Task Management</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth-styles-2025.css">
+  <link rel="stylesheet" href="sidebar-styles.css">
+  <link rel="stylesheet" href="header-styles.css">
+  <link rel="stylesheet" href="toast-styles.css">
+  <link rel="stylesheet" href="kanban-styles.css">
+  <link rel="stylesheet" href="view-styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- App Config -->
+  <script>
+    window.appConfig = {
+      apiUrl: 'http://localhost:5000',
+      socketUrl: 'http://localhost:5000'
+    };
+  </script>
 </head>
 
 <body>
+
+  <!-- Login Modal -->
+  <div class="modal" id="login-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Welcome Back</h2>
+        <p class="modal-subtitle">Sign in to continue your productivity journey</p>
+        <button class="close-modal">&times;</button>
+      </div>
+      <form id="login-form" class="modern-form">
+        <div class="form-group floating-label">
+          <input type="email" id="login-email" required autocomplete="email">
+          <label for="login-email">
+            <i class="fas fa-envelope"></i>
+            Email Address
+          </label>
+          <div class="input-focus-border"></div>
+        </div>
+        <div class="form-group floating-label">
+          <input type="password" id="login-password" required>
+          <label for="login-password">
+            <i class="fas fa-lock"></i>
+            Password
+          </label>
+          <button type="button" class="password-toggle" tabindex="-1">
+            <i class="fas fa-eye"></i>
+          </button>
+          <div class="input-focus-border"></div>
+        </div>
+        <div class="form-extras">
+          <label class="remember-me">
+            <input type="checkbox" id="remember-me">
+            <span class="checkmark"></span>
+            Remember me
+          </label>
+          <a href="#" class="forgot-password">Forgot Password?</a>
+        </div>
+        <div id="login-error" class="form-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span class="error-message"></span>
+        </div>
+        <div class="auth-actions">
+          <button type="submit" class="btn-primary">
+            <span>Sign In</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <button type="button" id="guest-login" class="btn-secondary">
+            <i class="fas fa-user-secret"></i>
+            <span>Continue as Guest</span>
+          </button>
+        </div>
+        <div class="social-login">
+          <div class="auth-separator">
+            <span>Or continue with</span>
+          </div>
+          <div class="social-buttons">
+            <button type="button" class="social-btn google">
+              <img src="https://www.google.com/favicon.ico" alt="Google">
+              Google
+            </button>
+            <button type="button" class="social-btn github">
+              <i class="fab fa-github"></i>
+              GitHub
+            </button>
+          </div>
+        </div>
+        <div class="auth-switch">
+          <span>New to TaskFlow?</span>
+          <a href="#" id="switch-to-signup">Create an account</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Signup Modal -->
+  <div class="modal" id="signup-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Join TaskFlow</h2>
+        <p class="modal-subtitle">Create your account and start organizing today</p>
+        <button class="close-modal">&times;</button>
+      </div>
+      <form id="signup-form" class="modern-form">
+        <div class="form-group floating-label">
+          <input type="text" id="signup-username" required minlength="3" autocomplete="username">
+          <label for="signup-username">
+            <i class="fas fa-user"></i>
+            Username
+          </label>
+          <div class="input-focus-border"></div>
+        </div>
+        <div class="form-group floating-label">
+          <input type="email" id="signup-email" required autocomplete="email">
+          <label for="signup-email">
+            <i class="fas fa-envelope"></i>
+            Email Address
+          </label>
+          <div class="input-focus-border"></div>
+        </div>
+        <div class="form-group floating-label">
+          <input type="password" id="signup-password" required minlength="6" autocomplete="new-password">
+          <label for="signup-password">
+            <i class="fas fa-lock"></i>
+            Password
+          </label>
+          <button type="button" class="password-toggle" tabindex="-1">
+            <i class="fas fa-eye"></i>
+          </button>
+          <div class="input-focus-border"></div>
+        </div>
+        <div class="form-group floating-label">
+          <input type="text" id="signup-name" autocomplete="name">
+          <label for="signup-name">
+            <i class="fas fa-id-card"></i>
+            Full Name (Optional)
+          </label>
+          <div class="input-focus-border"></div>
+        </div>
+        <div id="signup-error" class="form-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span class="error-message"></span>
+        </div>
+        <div class="auth-actions">
+          <button type="submit" class="btn-primary">
+            <span>Create Account</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+        <div class="social-login">
+          <div class="auth-separator">
+            <span>Or sign up with</span>
+          </div>
+          <div class="social-buttons">
+            <button type="button" class="social-btn google">
+              <img src="https://www.google.com/favicon.ico" alt="Google">
+              Google
+            </button>
+            <button type="button" class="social-btn github">
+              <i class="fab fa-github"></i>
+              GitHub
+            </button>
+          </div>
+        </div>
+        <div class="auth-switch">
+          <span>Already have an account?</span>
+          <a href="#" id="switch-to-login">Sign in here</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- User Profile Modal -->
+  <div class="modal" id="user-profile-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Your Profile</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="profile-info">
+        <div class="profile-avatar">
+          <i class="fas fa-user-circle"></i>
+        </div>
+        <form id="profile-form">
+          <div class="form-group">
+            <label for="profile-name">Name</label>
+            <input type="text" id="profile-name">
+          </div>
+          <div class="form-group">
+            <label for="profile-email">Email</label>
+            <input type="email" id="profile-email" required>
+          </div>
+          <div class="form-group">
+            <label for="profile-password">New Password (Optional)</label>
+            <input type="password" id="profile-password" minlength="6">
+          </div>
+          <div id="profile-error" class="form-error"></div>
+          <button type="submit" class="btn-primary">Update Profile</button>
+        </form>
+        <div class="profile-actions">
+          <button id="logout-btn" class="btn-secondary">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="app-container">
 
@@ -31,12 +232,70 @@
             <option value="ocean">Ocean</option>
           </select>
         </div>
+        <div class="data-management-dropdown">
+          <button class="icon-btn" id="data-management-btn">
+            <i class="fas fa-database"></i>
+          </button>
+          <div class="dropdown-content">
+            <button id="export-data" class="dropdown-item">
+              <i class="fas fa-file-export"></i>
+              Export Data
+            </button>
+            <button id="import-data" class="dropdown-item">
+              <i class="fas fa-file-import"></i>
+              Import Data
+            </button>
+          </div>
+        </div>
         <button id="settings-btn" class="icon-btn">
           <i class="fas fa-cog"></i>
         </button>
-        <button id="user-profile" class="icon-btn">
-          <i class="fas fa-user-circle"></i>
-        </button>
+        <div class="auth-buttons" id="auth-buttons">
+          <button type="button" id="login-btn" class="auth-btn glass-effect">
+            <div class="btn-content">
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Login</span>
+            </div>
+            <div class="btn-background"></div>
+          </button>
+          <button type="button" id="signup-btn" class="auth-btn primary glow-effect">
+            <div class="btn-content">
+              <i class="fas fa-user-plus"></i>
+              <span>Sign Up Free</span>
+            </div>
+            <div class="btn-shine"></div>
+          </button>
+          <button type="button" id="guest-login" class="auth-btn secondary hover-float">
+            <div class="btn-content">
+              <i class="fas fa-user-secret"></i>
+              <span>Continue as Guest</span>
+            </div>
+            <div class="btn-background"></div>
+          </button>
+        </div>
+        <div class="user-profile-wrapper" id="user-profile-wrapper" style="display: none;">
+          <button class="icon-btn" id="user-profile" onclick="showModal(document.getElementById('user-profile-modal'))">
+            <i class="fas fa-user-circle"></i>
+            <span class="username-display"></span>
+          </button>
+          <div class="profile-dropdown">
+            <div class="profile-header">
+              <i class="fas fa-user-circle"></i>
+              <div class="user-info">
+                <span class="user-name"></span>
+                <span class="user-email"></span>
+              </div>
+            </div>
+            <button class="dropdown-item" onclick="showModal(document.getElementById('user-profile-modal'))">
+              <i class="fas fa-user-edit"></i>
+              Edit Profile
+            </button>
+            <button class="dropdown-item" id="logout-btn">
+              <i class="fas fa-sign-out-alt"></i>
+              Logout
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -74,34 +333,42 @@
         <div class="sidebar-section">
           <h3>Views</h3>
           <ul class="sidebar-menu">
-            <li id="list-view-btn"class="active"><i class="fas fa-list"></i> List View</li>
-            <li id="kanban-view-btn"><i class="fas fa-columns"></i> Kanban Board</li>
-            <li id="calender-view-btn"><i class="fas fa-calendar"></i> Calendar</li>
+            <li class="sidebar-item active" data-view="list">
+              <button class="view-btn" id="list-view-btn">
+                <i class="fas fa-list"></i>
+                <span>List View</span>
+              </button>
+            </li>
+            <li class="sidebar-item" data-view="kanban">
+              <button class="view-btn" id="kanban-view-btn">
+                <i class="fas fa-columns"></i>
+                <span>Kanban Board</span>
+              </button>
+            </li>
+            <li class="sidebar-item" data-view="calendar">
+              <button class="view-btn" id="calendar-view-btn">
+                <i class="fas fa-calendar"></i>
+                <span>Calendar</span>
+              </button>
+            </li>
           </ul>
         </div>
 
         <div class="sidebar-section">
           <h3>Categories</h3>
           <ul class="category-list" id="category-list">
-            <li class="category-item" data-category="all">
-              <span class="category-color" style="background-color: #6366f1;"></span>
-              <span class="category-name">All</span>
+            <li class="category-item active" data-category="all">
+              <button class="category-btn">
+                <span class="category-color" style="background-color: #6366f1;"></span>
+                <span class="category-name">All Tasks</span>
+                <span class="category-count">0</span>
+              </button>
             </li>
-            <li class="category-item" data-category="work">
-              <span class="category-color" style="background-color: #f59e0b;"></span>
-              <span class="category-name">Work</span>
-            </li>
-            <li class="category-item" data-category="personal">
-              <span class="category-color" style="background-color: #10b981;"></span>
-              <span class="category-name">Personal</span>
-            </li>
-            <li class="category-item" data-category="health">
-              <span class="category-color" style="background-color: #ef4444;"></span>
-              <span class="category-name">Health</span>
-            </li>
+            <!-- Dynamic categories will be added here -->
           </ul>
-          <button id="add-category" class="text-btn">
-            <i class="fas fa-plus"></i> New Category
+          <button id="manage-categories" class="text-btn">
+            <i class="fas fa-plus"></i>
+            <span>Manage Categories</span>
           </button>
         </div>
 
@@ -243,6 +510,7 @@
       </div>
     </div>
 
+
     <!-- Task Details: Modal -->
     <div class="modal" id="task-details-modal">
       <div class="modal-content">
@@ -296,6 +564,35 @@
         <div class="modal-footer">
           <button class="delete-task" id="delete-task-btn">Delete</button>
           <button class="save-task" id="save-task-btn">Save Task</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Management Modal -->
+    <div class="modal" id="category-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Manage Categories</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="add-category-form">
+            <div class="form-group">
+              <label for="category-name">Category Name</label>
+              <input type="text" id="category-name" required>
+            </div>
+            <div class="form-group">
+              <label for="category-color">Category Color</label>
+              <input type="color" id="category-color" required>
+            </div>
+            <button type="submit" class="primary-btn">Add Category</button>
+          </form>
+          <div class="categories-list">
+            <h3>Your Categories</h3>
+            <div class="category-items" id="category-items">
+              <!-- Categories will be dynamically added here -->
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -441,11 +738,21 @@
             <h3>Data Management</h3>
             <div class="form-group button-group">
               <button class="secondary-btn" id="export-data">
-                <i class="fas fa-download"></i> Export Data
+                <i class="fas fa-download"></i>
+                <span class="btn-text">Export Data</span>
+                <div class="loader" style="display: none;"></div>
               </button>
               <button class="secondary-btn" id="import-data">
-                <i class="fas fa-upload"></i> Import Data
+                <i class="fas fa-upload"></i>
+                <span class="btn-text">Import Data</span>
+                <div class="loader" style="display: none;"></div>
               </button>
+            </div>
+            <div class="import-export-status" style="display: none;">
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <p class="status-text"></p>
             </div>
             <div class="form-group">
               <div class="checkbox-wrapper">
@@ -493,10 +800,122 @@
   </footer>
 
 
-  <!-- Scripts -->
+  <!-- Third-party Libraries -->
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="script.js"></script>
+  <script src="config.js"></script>
+  
+  <!-- Application Scripts -->
+  <script>
+    // Global configuration object
+    window.appConfig = {
+      apiUrl: 'http://localhost:5000',
+      socketUrl: 'http://localhost:5000'
+    };
+
+    // Initialize auth functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM Loaded - Setting up auth handlers');
+        
+        // Get button elements
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const loginModal = document.getElementById('login-modal');
+        const signupModal = document.getElementById('signup-modal');
+        
+        // Function to show modal with animation
+        function showModal(modal) {
+            if (modal) {
+                // Just add show class - CSS handles the rest
+                modal.classList.add('show');
+                // Focus the first input if it exists
+                setTimeout(() => {
+                    const firstInput = modal.querySelector('input');
+                    if (firstInput) firstInput.focus();
+                }, 100);
+            }
+        }
+        
+        // Function to hide modal with animation
+        function hideModal(modal) {
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+        
+        // Add click handlers
+        if (loginBtn) {
+            loginBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Login button clicked');
+                showModal(loginModal);
+            });
+        }
+        
+        if (signupBtn) {
+            signupBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Signup button clicked');
+                showModal(signupModal);
+            });
+        }
+        
+        // Close buttons
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                if (modal) {
+                    hideModal(modal);
+                }
+            });
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                hideModal(e.target);
+            }
+        });
+
+        // Modal switching
+        document.getElementById('switch-to-signup')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            loginModal?.classList.remove('show');
+            signupModal?.classList.add('show');
+        });
+
+        document.getElementById('switch-to-login')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            signupModal?.classList.remove('show');
+            loginModal?.classList.add('show');
+        });
+
+        // Check for modal display from session storage
+        const showModal = sessionStorage.getItem('showModal');
+        if (showModal === 'login') {
+            loginModal?.classList.add('show');
+        } else if (showModal === 'signup') {
+            signupModal?.classList.add('show');
+        }
+        sessionStorage.removeItem('showModal');
+    });
+  </script>
+  
+  <!-- Load remaining application scripts -->
+  <script src="header.js"></script>
+  <script src="auth.js"></script>
+  <script src="views.js"></script>
+  <script src="categories.js"></script>
+  <script src="filters.js"></script>
+  <script src="productivity.js"></script>
+  <script src="real-time.js"></script>
+  <script src="animations.js"></script>
+  <script src="kanban.js"></script>
+  <script src="task-events.js"></script>
+  <script src="import-export.js"></script>
   <script src="charts.js"></script>
+  <script src="script.js"></script>
+  <script src="view-manager.js"></script>
 </body>
 
 </html>

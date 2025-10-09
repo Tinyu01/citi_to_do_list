@@ -1,0 +1,73 @@
+/* View Management Styles */
+.view-container > div {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.view-container > div.active {
+    display: block;
+    opacity: 1;
+}
+
+/* View Button Styles */
+.sidebar-item {
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-item.active {
+    background-color: var(--highlight-bg);
+}
+
+.sidebar-item .view-btn {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    color: var(--text-color);
+    font-size: 1rem;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: color 0.3s ease;
+}
+
+.sidebar-item.active .view-btn {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.sidebar-item .view-btn i {
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+}
+
+/* View Container Styles */
+#list-view, #kanban-view, #calendar-view {
+    min-height: 200px;
+    padding: 20px;
+    background: var(--surface-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Active View Indicator */
+.sidebar-item::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--primary-color);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.sidebar-item.active::after {
+    transform: scaleY(1);
+}
