@@ -95,6 +95,131 @@
     --border-radius-lg: 0.75rem;
     --border-radius-full: 9999px;
   }
+
+    /* ======================
+       THEME MAPPINGS (data-theme)
+       ====================== */
+    :root[data-theme='light'] {
+      --bg: var(--light-bg);
+      --sidebar-bg: var(--light-sidebar-bg);
+      --card-bg: var(--light-card-bg);
+      --text: var(--light-text);
+      --text-secondary: var(--light-text-secondary);
+      --border: var(--light-border);
+      --accent: var(--light-accent);
+      --hover: var(--light-hover);
+      /* derived used across files */
+      --surface-color: var(--card-bg);
+      --surface-color-hover: var(--hover);
+      --text-color: var(--text);
+      --text-color-light: var(--text-secondary);
+      --primary-color: var(--accent);
+      --primary-color-dark: color-mix(in srgb, var(--accent) 85%, #000);
+      --primary: var(--accent);
+      --primary-dark: var(--primary-color-dark);
+      --highlight-bg: color-mix(in srgb, var(--accent) 15%, transparent);
+      /* footer icon visibility */
+      --footer-icon-bg: rgba(0, 0, 0, 0.08);
+      --footer-icon-bg-hover: rgba(0, 0, 0, 0.15);
+      --footer-icon-fg: var(--primary);
+      --footer-icon-fg-hover: #fff;
+    }
+
+    :root[data-theme='dark'] {
+      --bg: var(--dark-bg);
+      --sidebar-bg: var(--dark-sidebar-bg);
+      --card-bg: var(--dark-card-bg);
+      --text: var(--dark-text);
+      --text-secondary: var(--dark-text-secondary);
+      --border: var(--dark-border);
+      --accent: var(--dark-accent);
+      --hover: var(--dark-hover);
+      --surface-color: var(--card-bg);
+      --surface-color-hover: var(--hover);
+      --text-color: var(--text);
+      --text-color-light: var(--text-secondary);
+      --primary-color: var(--accent);
+      --primary-color-dark: color-mix(in srgb, var(--accent) 85%, #000);
+      --primary: var(--accent);
+      --primary-dark: var(--primary-color-dark);
+      --highlight-bg: color-mix(in srgb, var(--accent) 20%, transparent);
+      --footer-icon-bg: rgba(255, 255, 255, 0.15);
+      --footer-icon-bg-hover: rgba(255, 255, 255, 0.25);
+      --footer-icon-fg: #ffffff;
+      --footer-icon-fg-hover: #ffffff;
+    }
+
+    :root[data-theme='sunset'] {
+      --bg: var(--sunset-bg);
+      --sidebar-bg: var(--sunset-sidebar-bg);
+      --card-bg: var(--sunset-card-bg);
+      --text: var(--sunset-text);
+      --text-secondary: var(--sunset-text-secondary);
+      --border: var(--sunset-border);
+      --accent: var(--sunset-accent);
+      --hover: var(--sunset-hover);
+      --surface-color: var(--card-bg);
+      --surface-color-hover: var(--hover);
+      --text-color: var(--text);
+      --text-color-light: var(--text-secondary);
+      --primary-color: var(--accent);
+      --primary-color-dark: color-mix(in srgb, var(--accent) 85%, #000);
+      --primary: var(--accent);
+      --primary-dark: var(--primary-color-dark);
+      --highlight-bg: color-mix(in srgb, var(--accent) 20%, transparent);
+      --footer-icon-bg: rgba(255, 255, 255, 0.15);
+      --footer-icon-bg-hover: rgba(255, 255, 255, 0.25);
+      --footer-icon-fg: #ffffff;
+      --footer-icon-fg-hover: #ffffff;
+    }
+
+    :root[data-theme='forest'] {
+      --bg: var(--forest-bg);
+      --sidebar-bg: var(--forest-sidebar-bg);
+      --card-bg: var(--forest-card-bg);
+      --text: var(--forest-text);
+      --text-secondary: var(--forest-text-secondary);
+      --border: var(--forest-border);
+      --accent: var(--forest-accent);
+      --hover: var(--forest-hover);
+      --surface-color: var(--card-bg);
+      --surface-color-hover: var(--hover);
+      --text-color: var(--text);
+      --text-color-light: var(--text-secondary);
+      --primary-color: var(--accent);
+      --primary-color-dark: color-mix(in srgb, var(--accent) 85%, #000);
+      --primary: var(--accent);
+      --primary-dark: var(--primary-color-dark);
+      --highlight-bg: color-mix(in srgb, var(--accent) 15%, transparent);
+      --footer-icon-bg: rgba(0, 0, 0, 0.08);
+      --footer-icon-bg-hover: rgba(0, 0, 0, 0.15);
+      --footer-icon-fg: var(--primary);
+      --footer-icon-fg-hover: #fff;
+    }
+
+    :root[data-theme='ocean'] {
+      --bg: var(--ocean-bg);
+      --sidebar-bg: var(--ocean-sidebar-bg);
+      --card-bg: var(--ocean-card-bg);
+      --text: var(--ocean-text);
+      --text-secondary: var(--ocean-text-secondary);
+      --border: var(--ocean-border);
+      --accent: var(--ocean-accent);
+      --hover: var(--ocean-hover);
+      --surface-color: var(--card-bg);
+      --surface-color-hover: var(--hover);
+      --text-color: var(--text);
+      --text-color-light: var(--text-secondary);
+      --primary-color: var(--accent);
+      --primary-color-dark: color-mix(in srgb, var(--accent) 85%, #000);
+      --primary: var(--accent);
+      --primary-dark: var(--primary-color-dark);
+      --highlight-bg: color-mix(in srgb, var(--accent) 15%, transparent);
+      --footer-icon-bg: rgba(0, 0, 0, 0.08);
+      --footer-icon-bg-hover: rgba(0, 0, 0, 0.15);
+      --footer-icon-fg: var(--primary);
+      --footer-icon-fg-hover: #fff;
+    }
   
   /* ======================
      BASE STYLES & RESET
@@ -1234,6 +1359,7 @@
     z-index: 0;
     transform: translateX(-100%);
     animation: shine 3s infinite;
+    pointer-events: none; /* don't block clicks */
   }
   
   .footer-container {
@@ -1242,6 +1368,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+    z-index: 1; /* above decorative layers */
   }
   
   footer p {
@@ -1292,6 +1420,7 @@
     justify-content: center;
     gap: var(--spacing-xl);
     flex-wrap: wrap;
+    margin-bottom: var(--spacing-sm);
   }
   
   .footer-links a {
@@ -1330,13 +1459,17 @@
   .footer-social {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: var(--spacing-md);
     margin-top: var(--spacing-md);
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
   }
   
   .footer-social a {
-    color: white;
-    background: rgba(255, 255, 255, 0.15);
+    color: var(--footer-icon-fg);
+    background: var(--footer-icon-bg);
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -1344,11 +1477,19 @@
     align-items: center;
     justify-content: center;
     transition: all var(--transition-fast);
+    position: relative;
+    z-index: 1;
+  }
+  .footer-social a i {
+    font-size: 16px;
+    line-height: 1;
+    display: inline-block;
   }
   
   .footer-social a:hover {
     transform: translateY(-3px);
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--footer-icon-bg-hover);
+    color: var(--footer-icon-fg-hover);
   }
   
   .footer-wave {
@@ -1358,7 +1499,10 @@
     width: 100%;
     height: 12px;
     opacity: 0.5;
+    z-index: 0;
+    pointer-events: none; /* let clicks pass to links */
   }
+  .footer-wave svg { pointer-events: none; }
   
   /* Theme-specific footer styles */
   .theme-dark footer {

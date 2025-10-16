@@ -111,6 +111,7 @@
   font-size: 2rem;
   font-weight: 700;
   background: linear-gradient(120deg, #2563eb, #7c3aed);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 0.5rem;
