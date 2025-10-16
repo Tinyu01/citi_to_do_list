@@ -12,16 +12,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const file = e.target.files[0];
     if (file) {
       window.importTasksFromExcel(file, (importedTasks) => {
-        // Update the tasks array in guestStorage
-        guestStorage.tasks = importedTasks.map(task => ({
+        // Merge: prepend imported tasks on top of existing ones (do NOT replace)
+        const existingTasks = guestStorage.getTasks() || [];
+        const now = Date.now();
+        const newTasks = importedTasks.map((task, idx) => ({
           ...task,
-          id: Date.now() + Math.random(),
+          // Ensure string id for consistency with GuestStorage.addTask
+          id: `${now + idx}-${Math.random().toString(36).slice(2, 8)}`,
           completed: false,
+          status: task.status || 'todo',
           createdAt: new Date().toISOString()
         }));
-        // Save to localStorage
+        // Put new tasks first, then the existing ones
+        guestStorage.tasks = [...newTasks, ...existingTasks];
+        // Persist and refresh UI
         guestStorage.saveTasks();
-        // Reload to show imported tasks
+        // Optional: simple feedback
+        if (typeof showToast === 'function') {
+          showToast(`Imported ${newTasks.length} task(s)`, 'success');
+        }
         location.reload();
       });
     }
