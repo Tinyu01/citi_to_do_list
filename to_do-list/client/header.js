@@ -4,11 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeSelect = document.getElementById('theme-select');
     const html = document.documentElement;
 
-    themeSelect?.addEventListener('change', () => {
+    themeSelect?.addEventListener('change', async () => {
         const selectedTheme = themeSelect.value;
         html.setAttribute('data-theme', selectedTheme);
         localStorage.setItem('theme', selectedTheme);
-        
+
         // Update theme preview in settings
         document.querySelectorAll('.theme-option').forEach(option => {
             option.classList.remove('active');
@@ -16,12 +16,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 option.classList.add('active');
             }
         });
+
+        // Persist to server if logged in
+        try {
+            const token = localStorage.getItem('authToken');
+            if (token && window.appConfig?.apiUrl) {
+                await fetch(`${window.appConfig.apiUrl}/auth/profile`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ preferences: { theme: selectedTheme } })
+                });
+            }
+        } catch (e) {
+            console.warn('Failed to persist theme preference:', e);
+        }
     });
 
     // Load saved theme
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    themeSelect.value = savedTheme;
-    html.setAttribute('data-theme', savedTheme);
+    // Load theme preference (server takes precedence when logged in)
+    (async () => {
+        let initialTheme = localStorage.getItem('theme') || 'light';
+        try {
+            const token = localStorage.getItem('authToken');
+            if (token && window.appConfig?.apiUrl) {
+                const resp = await fetch(`${window.appConfig.apiUrl}/auth/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const serverTheme = data?.user?.preferences?.theme;
+                    if (serverTheme) {
+                        initialTheme = serverTheme;
+                        localStorage.setItem('theme', serverTheme);
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to load server theme preference:', e);
+        }
+        themeSelect && (themeSelect.value = initialTheme);
+        html.setAttribute('data-theme', initialTheme);
+    })();
 
     // Settings Modal
     const settingsBtn = document.getElementById('settings-btn');

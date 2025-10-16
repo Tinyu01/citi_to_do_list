@@ -111,19 +111,30 @@ router.get('/profile', auth, async (req, res) => {
 // Update user profile
 router.patch('/profile', auth, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ['name', 'email', 'password'];
-  const isValidOperation = updates.every(update => 
-    allowedUpdates.includes(update)
-  );
+  const allowedUpdates = ['name', 'email', 'password', 'preferences'];
+  const isValidOperation = updates.every(update => allowedUpdates.includes(update));
 
   if (!isValidOperation) {
     return res.status(400).json({ message: 'Invalid updates' });
   }
 
   try {
+    // Handle primitive fields
     updates.forEach(update => {
+      if (update === 'preferences') return; // handle below
       req.user[update] = req.body[update];
     });
+
+    // Merge preferences safely (theme, defaultView)
+    if (req.body.preferences && typeof req.body.preferences === 'object') {
+      const allowedPrefs = ['theme', 'defaultView'];
+      req.user.preferences = req.user.preferences || {};
+      Object.keys(req.body.preferences).forEach(key => {
+        if (allowedPrefs.includes(key)) {
+          req.user.preferences[key] = req.body.preferences[key];
+        }
+      });
+    }
 
     await req.user.save();
     res.json({ 
