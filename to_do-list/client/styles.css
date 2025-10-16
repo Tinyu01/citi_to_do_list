@@ -597,12 +597,24 @@
   
   .list-view, .kanban-view, .calendar-view {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    pointer-events: none !important;
   }
   
   .list-view.active-view,
   .kanban-view.active-view,
   .calendar-view.active-view {
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
+    position: relative !important;
+    pointer-events: auto !important;
   }
   
   /* Task List Styles */

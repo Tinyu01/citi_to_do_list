@@ -795,35 +795,42 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const viewType = btn.closest('[data-view]').dataset.view;
       currentView = viewType;
-      
+
       // Update active states
       document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
       btn.closest('.sidebar-item').classList.add('active');
 
-      // Update view visibility
-      document.querySelectorAll('.view-container > div').forEach(view => {
-        view.style.display = 'none';
-        view.classList.remove('active-view');
-      });
+      // Hide all views
+      const listView = document.getElementById('list-view');
+      const kanbanView = document.getElementById('kanban-view');
+      const calendarView = document.getElementById('calendar-view');
+      if (listView) {
+        listView.style.display = 'none';
+        listView.classList.remove('active-view');
+      }
+      if (kanbanView) {
+        kanbanView.style.display = 'none';
+        kanbanView.classList.remove('active-view');
+      }
+      if (calendarView) {
+        calendarView.style.display = 'none';
+        calendarView.classList.remove('active-view');
+      }
 
-      const viewMap = {
-        'list': 'list-view',
-        'kanban': 'kanban-view',
-        'calendar': 'calendar-view'
-      };
-
-      const targetView = document.getElementById(viewMap[viewType]);
-      if (targetView) {
-        targetView.style.display = 'block';
-        targetView.classList.add('active-view');
-        if (viewType === 'kanban') {
-          updateKanbanView();
-          setupKanbanDragDrop();
-        } else if (viewType === 'list') {
-          updateListView();
-        } else if (viewType === 'calendar') {
-          updateCalendarView();
-        }
+      // Show only the selected view
+      if (viewType === 'list' && listView) {
+        listView.style.display = 'block';
+        listView.classList.add('active-view');
+        updateListView();
+      } else if (viewType === 'kanban' && kanbanView) {
+        kanbanView.style.display = 'block';
+        kanbanView.classList.add('active-view');
+        updateKanbanView();
+        setupKanbanDragDrop();
+      } else if (viewType === 'calendar' && calendarView) {
+        calendarView.style.display = 'block';
+        calendarView.classList.add('active-view');
+        updateCalendarView();
       }
     });
   });

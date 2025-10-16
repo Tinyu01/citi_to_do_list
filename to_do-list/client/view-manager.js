@@ -48,10 +48,12 @@ class ViewManager {
     switchView(viewType) {
         console.log('Switching to view:', viewType);
         
-        // Deactivate all views and buttons
+        // Deactivate all views and buttons - ensure complete hiding
         Object.keys(this.views).forEach(type => {
             if (this.views[type]) {
                 this.views[type].style.display = 'none';
+                this.views[type].style.visibility = 'hidden';
+                this.views[type].style.opacity = '0';
                 this.views[type].classList.remove('active');
                 this.views[type].classList.remove('active-view');
             }
@@ -60,9 +62,11 @@ class ViewManager {
             }
         });
 
-        // Activate selected view and button
+        // Activate selected view and button - ensure complete showing
         if (this.views[viewType]) {
             this.views[viewType].style.display = 'block';
+            this.views[viewType].style.visibility = 'visible';
+            this.views[viewType].style.opacity = '1';
             this.views[viewType].classList.add('active');
             this.views[viewType].classList.add('active-view');
             this.buttons[viewType].parentElement.classList.add('active');
