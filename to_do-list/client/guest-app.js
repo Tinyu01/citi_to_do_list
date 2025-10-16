@@ -666,6 +666,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
   }
 
+  // Listen for chart time range requests
+  document.addEventListener('requestProductivityData', (e) => {
+    const timeRange = e.detail.timeRange;
+    const weekData = getWeeklyData();
+    const monthData = getMonthlyData();
+
+    document.dispatchEvent(new CustomEvent('productivityDataResponse', {
+      detail: {
+        weekly: weekData,
+        monthly: monthData
+      }
+    }));
+  });
+
   // Get weekly data
   function getWeeklyData() {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
