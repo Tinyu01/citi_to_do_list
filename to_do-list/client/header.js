@@ -110,7 +110,12 @@ document.addEventListener('DOMContentLoaded', () => {
             progressBar.style.width = '0%';
             statusText.textContent = 'Preparing data for export...';
 
-            await window.exportTasksToCSV(updateProgress);
+            // Use the correct Excel export function (now available globally)
+            const tasks = window.guestStorage ? window.guestStorage.getTasks() : [];
+            window.exportTasksToExcel(tasks, 'tasks-export.xlsx');
+            
+            progressBar.style.width = '100%';
+            statusText.textContent = 'Export complete!';
             showSuccess('Data exported successfully');
         } catch (error) {
             showError('Failed to export data: ' + error.message);
@@ -122,36 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    importDataBtn?.addEventListener('click', () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.csv';
-        input.style.display = 'none';
-        
-        input.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                try {
-                    showLoading(importDataBtn);
-                    importExportStatus.style.display = 'block';
-                    progressBar.style.width = '0%';
-                    statusText.textContent = 'Reading file...';
-
-                    await handleFileImport(file, updateProgress);
-                    showSuccess('Data imported successfully');
-                } catch (error) {
-                    showError('Failed to import data: ' + error.message);
-                } finally {
-                    hideLoading(importDataBtn);
-                    setTimeout(() => {
-                        importExportStatus.style.display = 'none';
-                    }, 3000);
-                }
-            }
-        };
-        
-        input.click();
-    });
+    // Import functionality is now handled in guest-app.js and dashboard-app.js
+    // No need for duplicate handler here
 
     // Progress tracking for import/export
     function updateProgress(percent, message) {

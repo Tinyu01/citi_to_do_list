@@ -1,5 +1,52 @@
 // Guest Mode Application Logic
 document.addEventListener('DOMContentLoaded', () => {
+  // Create hidden file input for import functionality
+  let hiddenFileInput = document.createElement('input');
+  hiddenFileInput.type = 'file';
+  hiddenFileInput.accept = '.xlsx,.xls';
+  hiddenFileInput.id = 'hidden-import-excel-input';
+  hiddenFileInput.style.display = 'none';
+  document.body.appendChild(hiddenFileInput);
+  
+  hiddenFileInput.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      window.importTasksFromExcel(file, (importedTasks) => {
+        // Update the tasks array in guestStorage
+        guestStorage.tasks = importedTasks.map(task => ({
+          ...task,
+          id: Date.now() + Math.random(),
+          completed: false,
+          createdAt: new Date().toISOString()
+        }));
+        // Save to localStorage
+        guestStorage.saveTasks();
+        // Reload to show imported tasks
+        location.reload();
+      });
+    }
+  };
+  // Import SheetJS and excel-utils
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  document.head.appendChild(script);
+  script.onload = () => {
+      // Export button
+      const exportBtn = document.getElementById('export-data');
+      if (exportBtn) {
+        exportBtn.onclick = () => {
+          const tasks = guestStorage.getTasks();
+          window.exportTasksToExcel(tasks, 'guest-tasks.xlsx');
+        };
+      }
+      // Import button - trigger hidden file input
+      const importBtn = document.getElementById('import-data');
+      if (importBtn) {
+        importBtn.onclick = () => {
+          hiddenFileInput.click();
+        };
+      }
+  };
   console.log('Guest mode initialized');
   
   // Initialize guest data

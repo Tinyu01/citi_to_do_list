@@ -1,5 +1,82 @@
 // Dashboard Application Logic (Authenticated Users)
 document.addEventListener('DOMContentLoaded', () => {
+  // Create hidden file input for import functionality
+  let hiddenFileInput = document.createElement('input');
+  hiddenFileInput.type = 'file';
+  hiddenFileInput.accept = '.xlsx,.xls';
+  hiddenFileInput.id = 'hidden-import-excel-input';
+  hiddenFileInput.style.display = 'none';
+  document.body.appendChild(hiddenFileInput);
+  
+  hiddenFileInput.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      window.importTasksFromExcel(file, async (importedTasks) => {
+        try {
+          console.log('Importing tasks to database:', importedTasks);
+          const API_BASE_URL = window.appConfig.apiUrl;
+          const authToken = localStorage.getItem('authToken');
+          
+          let successCount = 0;
+          for (const task of importedTasks) {
+            const taskData = {
+              text: task.text,
+              description: task.description || '',
+              dueDate: task.dueDate || null,
+              category: task.category || { name: 'Work', color: '#4CAF50' },
+              priority: task.priority || 'medium',
+              status: 'todo',
+              completed: false,
+              subtasks: task.subtasks || []
+            };
+            
+            const response = await fetch(`${API_BASE_URL}/api/tasks`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+              },
+              body: JSON.stringify(taskData)
+            });
+            
+            if (response.ok) {
+              successCount++;
+              console.log(`Task "${task.text}" imported successfully`);
+            } else {
+              console.error(`Failed to import task "${task.text}"`);
+            }
+          }
+          
+          console.log(`Successfully imported ${successCount} out of ${importedTasks.length} tasks`);
+          alert(`Successfully imported ${successCount} tasks!`);
+          location.reload();
+        } catch (error) {
+          console.error('Error importing tasks:', error);
+          alert('Error importing tasks: ' + error.message);
+        }
+      });
+    }
+  };
+  // Import SheetJS and excel-utils
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  document.head.appendChild(script);
+  script.onload = () => {
+      // Export button
+      const exportBtn = document.getElementById('export-data');
+      if (exportBtn) {
+        exportBtn.onclick = () => {
+          window.exportTasksToExcel(tasks, 'dashboard-tasks.xlsx');
+        };
+      }
+      // Import button - trigger hidden file input
+      const importBtn = document.getElementById('import-data');
+      if (importBtn) {
+        importBtn.onclick = () => {
+          hiddenFileInput.click();
+        };
+      }
+  };
   console.log('Dashboard initialized');
   
   const API_BASE_URL = window.appConfig.apiUrl;
