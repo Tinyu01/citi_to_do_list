@@ -1,11 +1,11 @@
-Title,Description,Due Date,Category,Priority,Subtasks
-Task 1,Description 1,2025-10-20,Personal,High,Subtask 1.1; Subtask 1.2
-Task 2,Description 2,2025-10-21,Work,Medium,Subtask 2.1
-Task 3,Description 3,2025-10-22,Personal,Low,
-Task 4,Description 4,2025-10-23,Work,High,Subtask 4.1; Subtask 4.2; Subtask 4.3
-Task 5,Description 5,2025-10-24,Personal,Medium,
-Task 6,Description 6,2025-10-25,Work,Low,Subtask 6.1
-Task 7,Description 7,2025-10-26,Personal,High,
-Task 8,Description 8,2025-10-27,Work,Medium,Subtask 8.1; Subtask 8.2
-Task 9,Description 9,2025-10-28,Personal,Low,
-Task 10,Description 10,2025-10-29,Work,High,Subtask 10.1
+Title,Description,Due Date,Category,Category Color,Priority,Priority Color,Subtasks
+Task 1,Description 1,2025-10-20,Personal,#2196F3,High,#ef4444,Subtask 1.1; Subtask 1.2
+Task 2,Description 2,2025-10-21,Work,#4CAF50,Medium,#f59e0b,Subtask 2.1
+Task 3,Description 3,2025-10-22,Personal,#2196F3,Low,#22c55e,
+Task 4,Description 4,2025-10-23,Work,#4CAF50,High,#ef4444,Subtask 4.1; Subtask 4.2; Subtask 4.3
+Task 5,Description 5,2025-10-24,Personal,#2196F3,Medium,#f59e0b,
+Task 6,Description 6,2025-10-25,Work,#4CAF50,Low,#22c55e,Subtask 6.1
+Task 7,Description 7,2025-10-26,Personal,#2196F3,High,#ef4444,
+Task 8,Description 8,2025-10-27,Work,#4CAF50,Medium,#f59e0b,Subtask 8.1; Subtask 8.2
+Task 9,Description 9,2025-10-28,Personal,#2196F3,Low,#22c55e,
+Task 10,Description 10,2025-10-29,Work,#4CAF50,High,#ef4444,Subtask 10.1

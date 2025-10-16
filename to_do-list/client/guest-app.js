@@ -281,11 +281,12 @@ document.addEventListener('DOMContentLoaded', () => {
     li.className = `task-item ${task.completed ? 'completed' : ''} priority-${task.priority}`;
     li.dataset.taskId = task.id;
 
-    const priorityColors = {
-      low: '#4CAF50',
-      medium: '#FF9800',
-      high: '#f44336'
+    const defaultPriorityColors = {
+      low: '#22c55e',
+      medium: '#f59e0b',
+      high: '#ef4444'
     };
+    const priorityColor = task.priorityColor || defaultPriorityColors[task.priority] || '#9CA3AF';
 
     li.innerHTML = `
       <div class="task-content">
@@ -297,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="task-header-row">
             <span class="task-text">${task.text}</span>
             <div class="task-badges">
-              <span class="priority-badge" style="background-color: ${priorityColors[task.priority]}">
+              <span class="priority-badge" style="background-color: ${priorityColor}">
                 ${task.priority}
               </span>
               <span class="category-badge" style="background-color: ${task.category.color}">
@@ -506,10 +507,11 @@ document.addEventListener('DOMContentLoaded', () => {
     div.draggable = true;
 
     const priorityColors = {
-      low: '#4CAF50',
-      medium: '#FF9800',
-      high: '#f44336'
+      low: '#22c55e',
+      medium: '#f59e0b',
+      high: '#ef4444'
     };
+    const priorityColor = task.priorityColor || priorityColors[task.priority] || '#9CA3AF';
 
     div.innerHTML = `
       <div class="task-header">
@@ -522,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
       <div class="task-badges">
-        <span class="priority-badge" style="background-color: ${priorityColors[task.priority]}">
+        <span class="priority-badge" style="background-color: ${priorityColor}">
           ${task.priority}
         </span>
         <span class="category-badge" style="background-color: ${task.category.color}">
