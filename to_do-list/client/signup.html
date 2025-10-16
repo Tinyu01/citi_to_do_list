@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up | TaskFlow</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth-styles-2025.css">
+  <link rel="stylesheet" href="header-styles.css">
+  <link rel="stylesheet" href="toast-styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .vertical-auth-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .vertical-auth-header h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: 0.01em;
+      background: linear-gradient(120deg, #2563eb, #7c3aed);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    .vertical-auth-header .modal-subtitle {
+      font-size: 1.1rem;
+      color: #64748b;
+      margin: 0;
+      text-align: center;
+      font-weight: 400;
+    }
+  </style>
+</head>
+<body>
+  <div class="modal show" style="position:static;display:flex;align-items:center;justify-content:center;height:100vh;background:none;backdrop-filter:none;">
+    <div class="modal-content" style="max-width:440px;width:100%;margin:auto;">
+      <div class="vertical-auth-header">
+        <h2>Join TaskFlow</h2>
+        <p class="modal-subtitle">Create your account and start organizing today</p>
+      </div>
+      <form id="signup-form" class="modern-form">
+        <div class="form-group floating-label">
+          <input type="text" id="signup-username" required minlength="3" autocomplete="username">
+          <label for="signup-username">
+            <i class="fas fa-user"></i>
+            Username
+          </label>
+          <div class="input-focus-border"></div>
+        </div>
+        <div class="form-group floating-label">
+          <input type="email" id="signup-email" required autocomplete="email">
+          <label for="signup-email">
+            <i class="fas fa-envelope"></i>
+            Email Address
+          </label>
+          <div class="input-focus-border"></div>
+        </div>
+        <div class="form-group floating-label">
+          <input type="password" id="signup-password" required minlength="6" autocomplete="new-password">
+          <label for="signup-password">
+            <i class="fas fa-lock"></i>
+            Password
+          </label>
+          <button type="button" class="password-toggle" tabindex="-1">
+            <i class="fas fa-eye"></i>
+          </button>
+          <div class="input-focus-border"></div>
+        </div>
+        <div class="form-group floating-label">
+          <input type="text" id="signup-name" autocomplete="name">
+          <label for="signup-name">
+            <i class="fas fa-id-card"></i>
+            Full Name (Optional)
+          </label>
+          <div class="input-focus-border"></div>
+        </div>
+        <div id="signup-error" class="form-error">
+          <i class="fas fa-exclamation-circle"></i>
+          <span class="error-message"></span>
+        </div>
+        <div class="auth-actions">
+          <button type="submit" class="btn-primary">
+            <span>Create Account</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+        <div class="social-login">
+          <div class="auth-separator">
+            <span>Or sign up with</span>
+          </div>
+          <div class="social-buttons">
+            <button type="button" class="social-btn google">
+              <img src="https://www.google.com/favicon.ico" alt="Google">
+              Google
+            </button>
+            <button type="button" class="social-btn github">
+              <i class="fab fa-github"></i>
+              GitHub
+            </button>
+          </div>
+        </div>
+        <div class="auth-switch">
+          <span>Already have an account?</span>
+          <a href="login.html" id="switch-to-login">Sign in here</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="auth.js"></script>
+</body>
+</html>

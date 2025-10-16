@@ -596,11 +596,13 @@
   }
   
   .list-view, .kanban-view, .calendar-view {
-    display: none;
+    display: none !important;
   }
   
-  .active-view {
-    display: block;
+  .list-view.active-view,
+  .kanban-view.active-view,
+  .calendar-view.active-view {
+    display: block !important;
   }
   
   /* Task List Styles */

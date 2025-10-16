@@ -5,8 +5,9 @@
     transition: opacity 0.3s ease-in-out;
 }
 
-.view-container > div.active {
-    display: block;
+.view-container > div.active,
+.view-container > div.active-view {
+    display: block !important;
     opacity: 1;
 }
 

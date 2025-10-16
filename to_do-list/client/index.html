@@ -1,921 +1,617 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TaskFlow | Modern Task Management</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="auth-styles-2025.css">
-  <link rel="stylesheet" href="sidebar-styles.css">
-  <link rel="stylesheet" href="header-styles.css">
-  <link rel="stylesheet" href="toast-styles.css">
-  <link rel="stylesheet" href="kanban-styles.css">
-  <link rel="stylesheet" href="view-styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta name="description" content="TaskFlow - Next-generation task management for 2025. Featuring AI-powered organization, real-time collaboration, and intuitive workflows.">
+  <title>TaskFlow - Revolutionizing Task Management in 2025</title>
   
-  <!-- App Config -->
+  <!-- External Stylesheets -->
+  <link rel="stylesheet" href="landing-styles.css" type="text/css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <meta name="theme-color" content="#6366f1">
+  
+  <!-- Temporary Debug Styles -->
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #3b82f6;
+      --accent: #10b981;
+      --surface-light: #ffffff;
+      --surface-dark: #f8fafc;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+    }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--surface-light);
+      color: var(--text-primary);
+    }
+    
+    .hero {
+      background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+      color: white;
+      padding: 6rem 2rem;
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 1rem;
+      z-index: 100;
+    }
+    
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+    
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .nav-actions {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .login-btn, .signup-btn {
+      padding: 0.5rem 1.5rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .login-btn {
+      color: white;
+      border: 1px solid white;
+    }
+    
+    .signup-btn {
+      background: white;
+      color: var(--primary);
+    }
+  </style>
+  
+  <!-- Debug Script -->
   <script>
-    window.appConfig = {
-      apiUrl: 'http://localhost:5000',
-      socketUrl: 'http://localhost:5000'
-    };
+    window.addEventListener('DOMContentLoaded', () => {
+      // Check if external CSS is loaded
+      const styleSheets = [...document.styleSheets];
+      const landingStyles = styleSheets.find(sheet => 
+        sheet.href && sheet.href.includes('landing-styles.css')
+      );
+      
+      if (!landingStyles) {
+        console.error('External styles not loaded!');
+        document.body.insertAdjacentHTML('afterbegin', 
+          '<div style="background:red;color:white;padding:1rem;text-align:center">' +
+          'Warning: External styles failed to load. Using fallback styles.' +
+          '</div>'
+        );
+      } else {
+        console.log('External styles loaded successfully');
+      }
+    });
+  </script>
+  
+  <!-- Style Loading Detection -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const styleSheets = document.styleSheets;
+      let stylesLoaded = false;
+      
+      for (let i = 0; i < styleSheets.length; i++) {
+        if (styleSheets[i].href && styleSheets[i].href.includes('landing-styles.css')) {
+          stylesLoaded = true;
+          break;
+        }
+      }
+      
+      if (!stylesLoaded) {
+        console.error('Landing styles not loaded! Path:', '/to_do-list/client/landing-styles.css');
+        alert('Warning: Styles failed to load. Please make sure you\'re running through a web server and not opening the file directly.');
+      }
+    });
   </script>
 </head>
-
 <body>
-
-  <!-- Login Modal -->
-  <div class="modal" id="login-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Welcome Back</h2>
-        <p class="modal-subtitle">Sign in to continue your productivity journey</p>
-        <button class="close-modal">&times;</button>
+  <!-- Hero Section -->
+  <header class="hero">
+    <nav>
+      <div class="nav-container">
+        <div class="logo">
+          <i class="fas fa-check-circle"></i>
+          <span>TaskFlow</span>
+        </div>
+        <div class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#testimonials">Testimonials</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div class="nav-actions">
+          <a href="login.html" class="login-btn">Login</a>
+          <a href="signup.html" class="signup-btn">Get Started Free</a>
+          <a href="guest.html" class="guest-btn" style="color: white; font-weight: 500;">Try as Guest</a>
+        </div>
       </div>
-      <form id="login-form" class="modern-form">
-        <div class="form-group floating-label">
-          <input type="email" id="login-email" required autocomplete="email">
-          <label for="login-email">
-            <i class="fas fa-envelope"></i>
-            Email Address
-          </label>
-          <div class="input-focus-border"></div>
-        </div>
-        <div class="form-group floating-label">
-          <input type="password" id="login-password" required>
-          <label for="login-password">
-            <i class="fas fa-lock"></i>
-            Password
-          </label>
-          <button type="button" class="password-toggle" tabindex="-1">
-            <i class="fas fa-eye"></i>
-          </button>
-          <div class="input-focus-border"></div>
-        </div>
-        <div class="form-extras">
-          <label class="remember-me">
-            <input type="checkbox" id="remember-me">
-            <span class="checkmark"></span>
-            Remember me
-          </label>
-          <a href="#" class="forgot-password">Forgot Password?</a>
-        </div>
-        <div id="login-error" class="form-error">
-          <i class="fas fa-exclamation-circle"></i>
-          <span class="error-message"></span>
-        </div>
-        <div class="auth-actions">
-          <button type="submit" class="btn-primary">
-            <span>Sign In</span>
-            <i class="fas fa-arrow-right"></i>
-          </button>
-          <button type="button" id="guest-login" class="btn-secondary">
-            <i class="fas fa-user-secret"></i>
-            <span>Continue as Guest</span>
-          </button>
-        </div>
-        <div class="social-login">
-          <div class="auth-separator">
-            <span>Or continue with</span>
-          </div>
-          <div class="social-buttons">
-            <button type="button" class="social-btn google">
-              <img src="https://www.google.com/favicon.ico" alt="Google">
-              Google
-            </button>
-            <button type="button" class="social-btn github">
-              <i class="fab fa-github"></i>
-              GitHub
-            </button>
-          </div>
-        </div>
-        <div class="auth-switch">
-          <span>New to TaskFlow?</span>
-          <a href="#" id="switch-to-signup">Create an account</a>
-        </div>
-      </form>
-    </div>
-  </div>
+    </nav>
 
-  <!-- Signup Modal -->
-  <div class="modal" id="signup-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Join TaskFlow</h2>
-        <p class="modal-subtitle">Create your account and start organizing today</p>
-        <button class="close-modal">&times;</button>
+    <div class="hero-content">
+      <h1>Your Tasks, Reimagined for 2025</h1>
+      <p>Experience the future of task management with AI-powered organization, seamless collaboration, and intuitive workflows.</p>
+      <div class="hero-cta">
+        <a href="guest.html" class="primary-btn">Try Guest Mode</a>
+        <a href="#demo-video" class="secondary-btn">Watch Demo</a>
       </div>
-      <form id="signup-form" class="modern-form">
-        <div class="form-group floating-label">
-          <input type="text" id="signup-username" required minlength="3" autocomplete="username">
-          <label for="signup-username">
-            <i class="fas fa-user"></i>
-            Username
-          </label>
-          <div class="input-focus-border"></div>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="number">50K+</span>
+          <span class="label">Active Users</span>
         </div>
-        <div class="form-group floating-label">
-          <input type="email" id="signup-email" required autocomplete="email">
-          <label for="signup-email">
-            <i class="fas fa-envelope"></i>
-            Email Address
-          </label>
-          <div class="input-focus-border"></div>
+        <div class="stat">
+          <span class="number">4.9</span>
+          <span class="label">User Rating</span>
         </div>
-        <div class="form-group floating-label">
-          <input type="password" id="signup-password" required minlength="6" autocomplete="new-password">
-          <label for="signup-password">
-            <i class="fas fa-lock"></i>
-            Password
-          </label>
-          <button type="button" class="password-toggle" tabindex="-1">
-            <i class="fas fa-eye"></i>
-          </button>
-          <div class="input-focus-border"></div>
-        </div>
-        <div class="form-group floating-label">
-          <input type="text" id="signup-name" autocomplete="name">
-          <label for="signup-name">
-            <i class="fas fa-id-card"></i>
-            Full Name (Optional)
-          </label>
-          <div class="input-focus-border"></div>
-        </div>
-        <div id="signup-error" class="form-error">
-          <i class="fas fa-exclamation-circle"></i>
-          <span class="error-message"></span>
-        </div>
-        <div class="auth-actions">
-          <button type="submit" class="btn-primary">
-            <span>Create Account</span>
-            <i class="fas fa-arrow-right"></i>
-          </button>
-        </div>
-        <div class="social-login">
-          <div class="auth-separator">
-            <span>Or sign up with</span>
-          </div>
-          <div class="social-buttons">
-            <button type="button" class="social-btn google">
-              <img src="https://www.google.com/favicon.ico" alt="Google">
-              Google
-            </button>
-            <button type="button" class="social-btn github">
-              <i class="fab fa-github"></i>
-              GitHub
-            </button>
-          </div>
-        </div>
-        <div class="auth-switch">
-          <span>Already have an account?</span>
-          <a href="#" id="switch-to-login">Sign in here</a>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- User Profile Modal -->
-  <div class="modal" id="user-profile-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Your Profile</h2>
-        <button class="close-modal">&times;</button>
-      </div>
-      <div class="profile-info">
-        <div class="profile-avatar">
-          <i class="fas fa-user-circle"></i>
-        </div>
-        <form id="profile-form">
-          <div class="form-group">
-            <label for="profile-name">Name</label>
-            <input type="text" id="profile-name">
-          </div>
-          <div class="form-group">
-            <label for="profile-email">Email</label>
-            <input type="email" id="profile-email" required>
-          </div>
-          <div class="form-group">
-            <label for="profile-password">New Password (Optional)</label>
-            <input type="password" id="profile-password" minlength="6">
-          </div>
-          <div id="profile-error" class="form-error"></div>
-          <button type="submit" class="btn-primary">Update Profile</button>
-        </form>
-        <div class="profile-actions">
-          <button id="logout-btn" class="btn-secondary">
-            <i class="fas fa-sign-out-alt"></i>
-            Logout
-          </button>
+        <div class="stat">
+          <span class="number">99.9%</span>
+          <span class="label">Uptime</span>
         </div>
       </div>
     </div>
-  </div>
+  </header>
 
-  <div class="app-container">
-
-    <header>
-      <div class="logo responsive-logo">
-        <i class="fas fa-check-circle"></i>
-        <h1>TaskFlow</h1>
+  <!-- Features Section -->
+  <section id="features" class="features">
+    <h2>Why Choose TaskFlow?</h2>
+    <div class="features-grid">
+      <div class="feature-card" data-aos="fade-up">
+        <i class="fas fa-brain"></i>
+        <h3>AI-Powered Organization</h3>
+        <p>Smart task categorization and priority suggestions based on your work patterns.</p>
       </div>
-      <div class="header-actions">
-        <div class="theme-selector">
-          <select id="theme-select">
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-            <option value="sunset">Sunset</option>
-            <option value="forest">Forest</option>
-            <option value="ocean">Ocean</option>
-          </select>
-        </div>
-        <div class="data-management-dropdown">
-          <button class="icon-btn" id="data-management-btn">
-            <i class="fas fa-database"></i>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+        <i class="fas fa-project-diagram"></i>
+        <h3>Multiple Views</h3>
+        <p>Switch seamlessly between List, Kanban, and Calendar views to match your workflow.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+        <i class="fas fa-chart-line"></i>
+        <h3>Progress Analytics</h3>
+        <p>Detailed insights and visualization of your productivity trends.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+        <i class="fas fa-users"></i>
+        <h3>Team Collaboration</h3>
+        <p>Real-time updates and seamless sharing with team members.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Demo Section -->
+  <section id="demo" class="demo">
+    <div class="demo-container glass-card">
+      <div class="demo-content">
+        <h2>See TaskFlow in Action</h2>
+        <p class="section-subtitle">Experience the future of task management with our intuitive interface</p>
+        <div class="demo-tabs">
+          <button class="demo-tab active" data-view="list">
+            <i class="fas fa-list-ul"></i>
+            List View
           </button>
-          <div class="dropdown-content">
-            <button id="export-data" class="dropdown-item">
-              <i class="fas fa-file-export"></i>
-              Export Data
-            </button>
-            <button id="import-data" class="dropdown-item">
-              <i class="fas fa-file-import"></i>
-              Import Data
-            </button>
+          <button class="demo-tab" data-view="kanban">
+            <i class="fas fa-columns"></i>
+            Kanban Board
+          </button>
+          <button class="demo-tab" data-view="calendar">
+            <i class="far fa-calendar-alt"></i>
+            Calendar
+          </button>
+        </div>
+        <div class="demo-window">
+          <div class="demo-preview animate-float">
+            <!-- Demo content will be dynamically loaded -->
           </div>
-        </div>
-        <button id="settings-btn" class="icon-btn">
-          <i class="fas fa-cog"></i>
-        </button>
-        <div class="auth-buttons" id="auth-buttons">
-          <button type="button" id="login-btn" class="auth-btn glass-effect">
-            <div class="btn-content">
-              <i class="fas fa-sign-in-alt"></i>
-              <span>Login</span>
-            </div>
-            <div class="btn-background"></div>
-          </button>
-          <button type="button" id="signup-btn" class="auth-btn primary glow-effect">
-            <div class="btn-content">
-              <i class="fas fa-user-plus"></i>
-              <span>Sign Up Free</span>
-            </div>
-            <div class="btn-shine"></div>
-          </button>
-          <button type="button" id="guest-login" class="auth-btn secondary hover-float">
-            <div class="btn-content">
-              <i class="fas fa-user-secret"></i>
-              <span>Continue as Guest</span>
-            </div>
-            <div class="btn-background"></div>
-          </button>
-        </div>
-        <div class="user-profile-wrapper" id="user-profile-wrapper" style="display: none;">
-          <button class="icon-btn" id="user-profile" onclick="showModal(document.getElementById('user-profile-modal'))">
-            <i class="fas fa-user-circle"></i>
-            <span class="username-display"></span>
-          </button>
-          <div class="profile-dropdown">
-            <div class="profile-header">
-              <i class="fas fa-user-circle"></i>
-              <div class="user-info">
-                <span class="user-name"></span>
-                <span class="user-email"></span>
-              </div>
-            </div>
-            <button class="dropdown-item" onclick="showModal(document.getElementById('user-profile-modal'))">
-              <i class="fas fa-user-edit"></i>
-              Edit Profile
-            </button>
-            <button class="dropdown-item" id="logout-btn">
-              <i class="fas fa-sign-out-alt"></i>
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <div class="dashboard">
-      <div class="stats-banner">
-        <div class="stat-item">
-          <span id="total-tasks">0</span>
-          <p>Total Tasks</p>
-        </div>
-        <div class="stat-item">
-          <span id="completed-tasks">0</span>
-          <p>Completed</p>
-        </div>
-        <div class="stat-item">
-          <span id="pending-tasks">0</span>
-          <p>Pending</p>
-        </div>
-        <div class="stat-item">
-          <span id="productivity-score">0%</span>
-          <p>Productivity</p>
-        </div>
-      </div>
-
-      <div class="chart-container">
-        <canvas id="task-completion-chart"></canvas>
-        <div class="chart-controls">
-          <button class="chart-btn active" data-chart="weekly">Weekly</button>
-          <button class="chart-btn" data-chart="monthly">Monthly</button>
         </div>
       </div>
     </div>
+  </section>
 
-    <div class="main-content">
-      <div class="sidebar">
-        <div class="sidebar-section">
-          <h3>Views</h3>
-          <ul class="sidebar-menu">
-            <li class="sidebar-item active" data-view="list">
-              <button class="view-btn" id="list-view-btn">
-                <i class="fas fa-list"></i>
-                <span>List View</span>
-              </button>
-            </li>
-            <li class="sidebar-item" data-view="kanban">
-              <button class="view-btn" id="kanban-view-btn">
-                <i class="fas fa-columns"></i>
-                <span>Kanban Board</span>
-              </button>
-            </li>
-            <li class="sidebar-item" data-view="calendar">
-              <button class="view-btn" id="calendar-view-btn">
-                <i class="fas fa-calendar"></i>
-                <span>Calendar</span>
-              </button>
-            </li>
-          </ul>
+  <!-- Pricing Section -->
+  <section id="pricing" class="pricing">
+    <div class="section-header">
+      <h2>Simple, Transparent Pricing</h2>
+      <p class="section-subtitle">Choose the perfect plan for your needs</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card glass-card">
+        <div class="pricing-header">
+          <span class="plan-label">Start Free</span>
+          <h3>Free</h3>
+          <p class="price">$0<span>/month</span></p>
+          <p class="price-subtitle">Perfect for personal use</p>
         </div>
-
-        <div class="sidebar-section">
-          <h3>Categories</h3>
-          <ul class="category-list" id="category-list">
-            <li class="category-item active" data-category="all">
-              <button class="category-btn">
-                <span class="category-color" style="background-color: #6366f1;"></span>
-                <span class="category-name">All Tasks</span>
-                <span class="category-count">0</span>
-              </button>
-            </li>
-            <!-- Dynamic categories will be added here -->
-          </ul>
-          <button id="manage-categories" class="text-btn">
-            <i class="fas fa-plus"></i>
-            <span>Manage Categories</span>
-          </button>
-        </div>
-
-        <!-- <div class="sidebar-section">
-          <h3>Focus Mode</h3>
-          <div class="focus-controls">
-            <div class="pomodoro-timer">
-              <span id="timer-display">25:00</span>
-              <div class="timer-controls">
-                <button id="start-timer" class="timer-btn"><i class="fas fa-play"></i></button>
-                <button id="pause-timer" class="timer-btn"><i class="fas fa-pause"></i></button>
-                <button id="reset-timer" class="timer-btn"><i class="fas fa-redo"></i></button>
-              </div>
-            </div>
-            <button id="focus-mode-toggle" class="primary-btn">
-              <i class="fas fa-lightbulb"></i> Enter Focus Mode
-            </button>
-          </div>
-        </div> -->
+        <ul class="pricing-features">
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <span>Up to 100 tasks</span>
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <span>Basic views</span>
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <span>Personal calendar</span>
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <span>Mobile access</span>
+          </li>
+        </ul>
+        <a href="guest.html" class="pricing-cta">
+          Get Started
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
       
+      <div class="pricing-card popular glass-card">
+        <div class="pricing-header">
+          <span class="plan-label">Most Popular</span>
+          <h3>Pro</h3>
+          <p class="price">$9<span>/month</span></p>
+          <p class="price-subtitle">Ideal for professionals</p>
+        </div>
+        <ul class="pricing-features">
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <span>Unlimited tasks</span>
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <span>All views & features</span>
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <span>AI-powered insights</span>
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <span>Advanced analytics</span>
+          </li>
+        </ul>
+        <a href="signup.html" class="pricing-cta">
+          Start Free Trial
+          <i class="fas fa-arrow-right"></i>
+        </a>
       </div>
-
-      <div class="content-area">
-        <div class="top-actions">
-          <div class="search-container">
-            <i class="fas fa-search"></i>
-            <input type="text" id="search" placeholder="Search tasks..." aria-label="Search tasks">
-            <button id="voice-search" class="icon-btn" aria-label="Voice search">
-              <i class="fas fa-microphone"></i>
-            </button>
-          </div>
-
-          <div class="filter-container">
-            <button class="filter-btn active" data-filter="all">All</button>
-            <button class="filter-btn" data-filter="pending">Pending</button>
-            <button class="filter-btn" data-filter="completed">Completed</button>
-            <button class="filter-btn" data-filter="priority">Priority</button>
-            <button class="filter-btn" data-filter="today">Today</button>
-          </div>
-
-          <div class="sort-container">
-            <label for="sort-by">Sort by:</label>
-            <select id="sort-select">
-              <option value="date-asc">Date (Oldest)</option>
-              <option value="date-desc">Date (Newest)</option>
-              <option value="priority">Priority</option>
-              <option value="alphabetical">Alphabetical</option>
-            </select>
-          </div>
+      
+      <div class="pricing-card glass-card">
+        <div class="pricing-header">
+          <span class="plan-label">Custom Solution</span>
+          <h3>Enterprise</h3>
+          <p class="price">Custom</p>
+          <p class="price-subtitle">For large organizations</p>
         </div>
-
-        <div class="view-container">
-          <!-- List View -->
-          <div id="list-view" class="list-view active-view">
-            <ul id="tasks-list" class="tasks-list"></ul>
-          </div>
-
-          <!-- Kanban View -->
-          <div id="kanban-view" class="kanban-view" style="display: none;">
-            <div class="kanban-column" data-status="todo">
-              <h3>To Do</h3>
-              <ul class="kanban-list" id="todo-list"></ul>
-            </div>
-            <div class="kanban-column" data-status="in-progress">
-              <h3>In Progress</h3>
-              <ul class="kanban-list" id="in-progress-list"></ul>
-            </div>
-            <div class="kanban-column" data-status="completed">
-              <h3>Completed</h3>
-              <ul class="kanban-list" id="completed-list"></ul>
-            </div>
-          </div>
-
-          <!-- Calendar View -->
-          <div id="calendar-view" class="calendar-view" style="display: none;">
-            <div class="calendar-header">
-              <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
-              <h3 id="calendar-title">March 2025</h3>
-              <button id="next-month"><i class="fas fa-chevron-right"></i></button>
-            </div>
-            <div class="calendar-grid" id="calendar-grid"></div>
-          </div>
-
-          <div class="empty-state" id="empty-state">
-            <img src="./assets/Task.jpg" alt="No tasks" class="empty-image">
-            <p>No tasks found. Add a new task to get started!</p>
-            <button class="primary-btn" id="empty-add-task">
-              <i class="fas fa-plus"></i> Add Your First Task
-            </button>
-          </div>
-        </div>
-
-        <div class="add-task-container">
-          <div class="form-group">
-            <label for="new-task">Title</label>
-            <input type="text" id="new-task" placeholder="Add a new task" required>
-          </div>
-          <div class="form-group">
-            <label for="task-description">Description (Optional)</label>
-            <textarea id="task-description" rows="3" placeholder="Add a description"></textarea>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="due-date">Due Date</label>
-              <input type="date" id="due-date" min="" required>
-            </div>
-            <div class="form-group">
-              <label for="task-category">Category</label>
-              <select id="task-category" required>
-                <option value="none">Select Category</option>
-                <option value="work">Work</option>
-                <option value="personal">Personal</option>
-                <option value="health">Health</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Priority</label>
-            <div class="priority-selector">
-              <span class="priority-dot low active" data-priority="low" title="Low Priority"></span>
-              <span class="priority-dot medium" data-priority="medium" title="Medium Priority"></span>
-              <span class="priority-dot high" data-priority="high" title="High Priority"></span>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Subtasks (Optional)</label>
-            <ul id="subtasks-list"></ul>
-            <div class="add-subtask">
-              <input type="text" id="new-subtask" placeholder="Add subtask">
-              <button id="add-subtask-btn">Add</button>
-            </div>
-          </div>
-          <button id="add-task">
-            <i class="fas fa-plus"></i>
-            <span>Add Task</span>
-          </button>
-        </div>
-
+        <ul class="pricing-features">
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <span>Everything in Pro</span>
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <span>Priority support</span>
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <span>Custom integrations</span>
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i>
+            <span>Advanced security</span>
+          </li>
+        </ul>
+        <a href="#contact" class="pricing-cta">
+          Contact Sales
+          <i class="fas fa-arrow-right"></i>
+        </a>
       </div>
     </div>
+  </section>
 
-
-    <!-- Task Details: Modal -->
-    <div class="modal" id="task-details-modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Task Details</h2>
-          <button class="close-modal">&times;</button>
+  <!-- Testimonials Section -->
+  <section id="testimonials" class="testimonials">
+    <div class="section-header">
+      <h2>What Our Users Say</h2>
+      <p class="section-subtitle">Join thousands of satisfied TaskFlow users</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card glass-card animate-float">
+        <div class="testimonial-rating">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
         </div>
-        <div class="modal-body">
-          <div class="task-edit-form">
-            <div class="form-group">
-              <label for="edit-task-title">Title</label>
-              <input type="text" id="edit-task-title" placeholder="Add a new task" required>
-            </div>
-            <div class="form-group">
-              <label for="edit-task-description">Description (Optional)</label>
-              <textarea id="edit-task-description" rows="3" placeholder="Add a description"></textarea>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="edit-due-date">Due Date</label>
-                <input type="date" id="edit-due-date" min="" required>
-              </div>
-              <div class="form-group">
-                <label for="edit-task-category">Category</label>
-                <select id="edit-task-category" required>
-                  <option value="none">Select Category</option>
-                  <option value="work">Work</option>
-                  <option value="personal">Personal</option>
-                  <option value="health">Health</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Priority</label>
-              <div class="priority-selector">
-                <span class="priority-dot low" data-priority="low" title="Low Priority"></span>
-                <span class="priority-dot medium" data-priority="medium" title="Medium Priority"></span>
-                <span class="priority-dot high" data-priority="high" title="High Priority"></span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Subtasks (Optional)</label>
-              <ul id="subtasks-list"></ul>
-              <div class="add-subtask">
-                <input type="text" id="new-subtask" placeholder="Add subtask">
-                <button id="add-subtask-btn">Add</button>
-              </div>
-            </div>
+        <div class="testimonial-content">
+          <p>"TaskFlow has transformed how our team manages projects. The AI suggestions are incredibly accurate and save us hours of work each week!"</p>
+        </div>
+        <div class="testimonial-author">
+          <img src="assets/testimonial1.jpg" alt="Sarah Chen" class="avatar">
+          <div class="author-info">
+            <h4>Sarah Chen</h4>
+            <p>Product Manager, TechCorp</p>
           </div>
         </div>
-        <div class="modal-footer">
-          <button class="delete-task" id="delete-task-btn">Delete</button>
-          <button class="save-task" id="save-task-btn">Save Task</button>
+      </div>
+      
+      <div class="testimonial-card glass-card animate-float" style="animation-delay: 0.2s">
+        <div class="testimonial-rating">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+        </div>
+        <div class="testimonial-content">
+          <p>"The intuitive interface and real-time collaboration features have made task management a breeze. Best investment for our startup!"</p>
+        </div>
+        <div class="testimonial-author">
+          <img src="assets/testimonial2.jpg" alt="Marcus Rodriguez" class="avatar">
+          <div class="author-info">
+            <h4>Marcus Rodriguez</h4>
+            <p>CTO, InnovateLab</p>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- Category Management Modal -->
-    <div class="modal" id="category-modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Manage Categories</h2>
-          <button class="close-modal">&times;</button>
+      
+      <div class="testimonial-card glass-card animate-float" style="animation-delay: 0.4s">
+        <div class="testimonial-rating">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
         </div>
-        <div class="modal-body">
-          <form id="add-category-form">
-            <div class="form-group">
-              <label for="category-name">Category Name</label>
-              <input type="text" id="category-name" required>
-            </div>
-            <div class="form-group">
-              <label for="category-color">Category Color</label>
-              <input type="color" id="category-color" required>
-            </div>
-            <button type="submit" class="primary-btn">Add Category</button>
-          </form>
-          <div class="categories-list">
-            <h3>Your Categories</h3>
-            <div class="category-items" id="category-items">
-              <!-- Categories will be dynamically added here -->
-            </div>
+        <div class="testimonial-content">
+          <p>"The analytics insights have helped us optimize our workflow and increase productivity by 40%. Simply amazing!"</p>
+        </div>
+        <div class="testimonial-author">
+          <img src="assets/testimonial3.jpg" alt="Emily Zhang" class="avatar">
+          <div class="author-info">
+            <h4>Emily Zhang</h4>
+            <p>Operations Lead, GlobalTech</p>
           </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <!-- Settings Modal -->
-    <div class="modal" id="settings-modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Settings</h2>
-          <button class="close-modal">&times;</button>
+  <!-- FAQ Section -->
+  <section id="faq" class="faq">
+    <div class="section-header">
+      <h2>Frequently Asked Questions</h2>
+      <p class="section-subtitle">Got questions? We've got answers</p>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item glass-card">
+        <div class="faq-question">
+          <h3>How secure is my data?</h3>
+          <i class="fas fa-chevron-down"></i>
         </div>
-        <div class="modal-body">
-          <div class="settings-section">
-            <h3>Appearance</h3>
-            <div class="form-group">
-              <label>Theme</label>
-              <div class="theme-selector-container">
-                <div class="theme-option" data-theme="light">
-                  <div class="theme-preview theme-light">
-                    <div class="theme-preview-header"></div>
-                    <div class="theme-preview-body">
-                      <div class="theme-preview-sidebar"></div>
-                      <div class="theme-preview-content">
-                        <div class="theme-preview-item"></div>
-                        <div class="theme-preview-item"></div>
-                        <div class="theme-preview-item"></div>
-                      </div>
-                    </div>
-                    <div class="theme-name">Light</div>
-                  </div>
-                </div>
-                <div class="theme-option" data-theme="dark">
-                  <div class="theme-preview theme-dark">
-                    <div class="theme-preview-header"></div>
-                    <div class="theme-preview-body">
-                      <div class="theme-preview-sidebar"></div>
-                      <div class="theme-preview-content">
-                        <div class="theme-preview-item"></div>
-                        <div class="theme-preview-item"></div>
-                        <div class="theme-preview-item"></div>
-                      </div>
-                    </div>
-                    <div class="theme-name">Dark</div>
-                  </div>
-                </div>
-                <div class="theme-option" data-theme="sunset">
-                  <div class="theme-preview theme-sunset">
-                    <div class="theme-preview-header"></div>
-                    <div class="theme-preview-body">
-                      <div class="theme-preview-sidebar"></div>
-                      <div class="theme-preview-content">
-                        <div class="theme-preview-item"></div>
-                        <div class="theme-preview-item"></div>
-                        <div class="theme-preview-item"></div>
-                      </div>
-                    </div>
-                    <div class="theme-name">Sunset</div>
-                  </div>
-                </div>
-                <div class="theme-option" data-theme="forest">
-                  <div class="theme-preview theme-forest">
-                    <div class="theme-preview-header"></div>
-                    <div class="theme-preview-body">
-                      <div class="theme-preview-sidebar"></div>
-                      <div class="theme-preview-content">
-                        <div class="theme-preview-item"></div>
-                        <div class="theme-preview-item"></div>
-                        <div class="theme-preview-item"></div>
-                      </div>
-                    </div>
-                    <div class="theme-name">Forest</div>
-                  </div>
-                </div>
-                <div class="theme-option" data-theme="ocean">
-                  <div class="theme-preview theme-ocean">
-                    <div class="theme-preview-header"></div>
-                    <div class="theme-preview-body">
-                      <div class="theme-preview-sidebar"></div>
-                      <div class="theme-preview-content">
-                        <div class="theme-preview-item"></div>
-                        <div class="theme-preview-item"></div>
-                        <div class="theme-preview-item"></div>
-                      </div>
-                    </div>
-                    <div class="theme-name">Ocean</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="font-size">Font Size</label>
-              <div class="slider-container">
-                <input type="range" id="font-size" class="slider" min="12" max="20" value="16">
-                <span class="slider-value" id="font-size-value">16px</span>
-              </div>
-            </div>
-          </div>
-          <div class="settings-section">
-            <h3>Notifications</h3>
-            <div class="form-group">
-              <div class="checkbox-wrapper">
-                <input type="checkbox" id="enable-notifications">
-                <label for="enable-notifications">Enable Notifications</label>
-              </div>
-            </div>
-            <div class="form-group">
-              <div class="checkbox-wrapper">
-                <input type="checkbox" id="enable-sound">
-                <label for="enable-sound">Sound Alerts</label>
-              </div>
-            </div>
-            <div class="form-group">
-              <div class="checkbox-wrapper">
-                <input type="checkbox" id="enable-reminders">
-                <label for="enable-reminders">Task Reminders</label>
-              </div>
-            </div>
-          </div>
-          <div class="settings-section">
-            <h3>Productivity</h3>
-            <div class="form-group">
-              <label for="pomodoro-duration">Pomodoro Duration</label>
-              <div class="slider-container">
-                <input type="range" id="pomodoro-duration" class="slider" min="5" max="60" value="25">
-                <span class="slider-value" id="pomodoro-duration-value">25 min</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="break-duration">Break Duration</label>
-              <div class="slider-container">
-                <input type="range" id="break-duration" class="slider" min="1" max="30" value="5">
-                <span class="slider-value" id="break-duration-value">5 min</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <div class="checkbox-wrapper">
-                <input type="checkbox" id="auto-break">
-                <label for="auto-break">Auto-start Breaks</label>
-              </div>
-            </div>
-          </div>
-          <div class="settings-section">
-            <h3>Data Management</h3>
-            <div class="form-group button-group">
-              <button class="secondary-btn" id="export-data">
-                <i class="fas fa-download"></i>
-                <span class="btn-text">Export Data</span>
-                <div class="loader" style="display: none;"></div>
-              </button>
-              <button class="secondary-btn" id="import-data">
-                <i class="fas fa-upload"></i>
-                <span class="btn-text">Import Data</span>
-                <div class="loader" style="display: none;"></div>
-              </button>
-            </div>
-            <div class="import-export-status" style="display: none;">
-              <div class="progress-bar">
-                <div class="progress-fill"></div>
-              </div>
-              <p class="status-text"></p>
-            </div>
-            <div class="form-group">
-              <div class="checkbox-wrapper">
-                <input type="checkbox" id="auto-save">
-                <label for="auto-save">Auto-save Changes</label>
-              </div>
-            </div>
-            <div class="form-group">
-              <button class="danger-btn" id="clear-data">
-                <i class="fas fa-trash-alt"></i> Clear All Data
-              </button>
-            </div>
-          </div>
+        <div class="faq-answer">
+          <p>We use industry-standard encryption and security measures to protect your data. Your information is stored in secure, encrypted databases with regular backups and 24/7 monitoring.</p>
         </div>
-        <div class="modal-footer">
-          <button class="save-settings" id="save-settings-btn">Save Settings</button>
+      </div>
+      
+      <div class="faq-item glass-card">
+        <div class="faq-question">
+          <h3>Can I export my data?</h3>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          <p>Yes! TaskFlow supports data export in multiple formats including CSV, JSON, and Excel. You can export your data anytime with just a few clicks.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item glass-card">
+        <div class="faq-question">
+          <h3>What's included in the free plan?</h3>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          <p>Our free plan includes up to 100 tasks, basic views (list and board), personal calendar integration, and mobile access. Perfect for individual users!</p>
+        </div>
+      </div>
+      
+      <div class="faq-item glass-card">
+        <div class="faq-question">
+          <h3>How does the AI assistance work?</h3>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+          <p>Our AI analyzes your work patterns and task history to provide smart suggestions for task prioritization, scheduling, and team allocation. It learns and improves over time!</p>
         </div>
       </div>
     </div>
+  </section>
 
-  </div>
-
-   <footer>
-    <div class="footer-wave">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
-        <path fill="rgba(255,255,255,0.1)"
-          d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,202.7C1248,213,1344,171,1392,149.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
-        </path>
-      </svg>
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="cta-container glass-card">
+      <div class="cta-content">
+        <h2>Ready to Transform Your Workflow?</h2>
+        <p class="cta-subtitle">Join thousands of productive teams already using TaskFlow</p>
+        <div class="cta-metrics">
+          <div class="cta-metric">
+            <span class="metric-value">50K+</span>
+            <span class="metric-label">Active Users</span>
+          </div>
+          <div class="cta-metric">
+            <span class="metric-value">98%</span>
+            <span class="metric-label">Customer Satisfaction</span>
+          </div>
+          <div class="cta-metric">
+            <span class="metric-value">24/7</span>
+            <span class="metric-label">Support</span>
+          </div>
+        </div>
+        <div class="cta-buttons">
+          <a href="guest.html" class="cta-primary">
+            Try Guest Mode
+            <i class="fas fa-arrow-right"></i>
+          </a>
+          <a href="#demo" class="cta-secondary">
+            Watch Demo
+            <i class="fas fa-play-circle"></i>
+          </a>
+        </div>
+      </div>
     </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="modern-footer">
     <div class="footer-container">
-      <p>TaskFlow &copy; <span id="current-year"></span> | Designed by <a href="https://tinyu01.github.io/citi_portfolio_website/">MASINGITA OTTIS MALULEKE</a> with <i
-          class="fas fa-heart"></i></p>
-      <div class="footer-links">
-        <a href="https://tinyu01.github.io/citi_portfolio_website/about.html">About</a>
-        <a href="#">Privacy Policy</a>
-        <a href="https://tinyu01.github.io/citi_portfolio_website/contact.html">Contact</a>
+      <div class="footer-content">
+        <div class="footer-section brand-section">
+          <a href="#" class="footer-logo">
+            <i class="fas fa-check-circle"></i>
+            TaskFlow
+          </a>
+          <p class="footer-tagline">Revolutionizing task management for the future</p>
+          <div class="social-links">
+            <a href="https://twitter.com/taskflow" class="social-link">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="https://linkedin.com/company/taskflow" class="social-link">
+              <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://github.com/taskflow" class="social-link">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="https://instagram.com/taskflow" class="social-link">
+              <i class="fab fa-instagram"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Product</h4>
+          <ul class="footer-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#testimonials">Testimonials</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#integrations">Integrations</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Company</h4>
+          <ul class="footer-links">
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="careers.html">Careers</a></li>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="press.html">Press Kit</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Legal</h4>
+          <ul class="footer-links">
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="security.html">Security</a></li>
+            <li><a href="gdpr.html">GDPR</a></li>
+            <li><a href="cookies.html">Cookie Policy</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h4>Support</h4>
+          <ul class="footer-links">
+            <li><a href="help.html">Help Center</a></li>
+            <li><a href="status.html">System Status</a></li>
+            <li><a href="docs.html">Documentation</a></li>
+            <li><a href="api.html">API Reference</a></li>
+            <li><a href="community.html">Community</a></li>
+          </ul>
+        </div>
       </div>
-      <div class="footer-social">
-        <a href="https://github.com/Tinyu01"><i class="fab fa-github"></i></a>
-        <a href="https://www.linkedin.com/in/thefreelancer201/"><i class="fab fa-linkedin"></i></a>
-        <a href="https://x.com/TheFreelancer20"><i class="fab fa-twitter"></i></a>
+      
+      <div class="footer-bottom">
+        <div class="footer-info">
+          <p>&copy; 2025 TaskFlow. All rights reserved.</p>
+          <div class="footer-certifications">
+            <img src="assets/iso-certified.svg" alt="ISO Certified">
+            <img src="assets/gdpr-compliant.svg" alt="GDPR Compliant">
+            <img src="assets/soc2-certified.svg" alt="SOC 2 Certified">
+          </div>
+        </div>
       </div>
     </div>
   </footer>
 
-
-  <!-- Third-party Libraries -->
-  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="config.js"></script>
-  
-  <!-- Application Scripts -->
+  <!-- Scripts -->
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script src="landing.js"></script>
   <script>
-    // Global configuration object
-    window.appConfig = {
-      apiUrl: 'http://localhost:5000',
-      socketUrl: 'http://localhost:5000'
-    };
+    // Initialize animations
+    AOS.init({
+      duration: 800,
+      offset: 100,
+      once: true
+    });
 
-    // Initialize auth functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM Loaded - Setting up auth handlers');
-        
-        // Get button elements
-        const loginBtn = document.getElementById('login-btn');
-        const signupBtn = document.getElementById('signup-btn');
-        const loginModal = document.getElementById('login-modal');
-        const signupModal = document.getElementById('signup-modal');
-        
-        // Function to show modal with animation
-        function showModal(modal) {
-            if (modal) {
-                // Just add show class - CSS handles the rest
-                modal.classList.add('show');
-                // Focus the first input if it exists
-                setTimeout(() => {
-                    const firstInput = modal.querySelector('input');
-                    if (firstInput) firstInput.focus();
-                }, 100);
-            }
-        }
-        
-        // Function to hide modal with animation
-        function hideModal(modal) {
-            if (modal) {
-                modal.classList.remove('show');
-            }
-        }
-        
-        // Add click handlers
-        if (loginBtn) {
-            loginBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log('Login button clicked');
-                showModal(loginModal);
-            });
-        }
-        
-        if (signupBtn) {
-            signupBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log('Signup button clicked');
-                showModal(signupModal);
-            });
-        }
-        
-        // Close buttons
-        document.querySelectorAll('.close-modal').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const modal = this.closest('.modal');
-                if (modal) {
-                    hideModal(modal);
-                }
-            });
-        });
-        
-        // Close modal when clicking outside
-        window.addEventListener('click', function(e) {
-            if (e.target.classList.contains('modal')) {
-                hideModal(e.target);
-            }
-        });
-
-        // Modal switching
-        document.getElementById('switch-to-signup')?.addEventListener('click', function(e) {
-            e.preventDefault();
-            loginModal?.classList.remove('show');
-            signupModal?.classList.add('show');
-        });
-
-        document.getElementById('switch-to-login')?.addEventListener('click', function(e) {
-            e.preventDefault();
-            signupModal?.classList.remove('show');
-            loginModal?.classList.add('show');
-        });
-
-        // Check for modal display from session storage
-        const showModal = sessionStorage.getItem('showModal');
-        if (showModal === 'login') {
-            loginModal?.classList.add('show');
-        } else if (showModal === 'signup') {
-            signupModal?.classList.add('show');
-        }
-        sessionStorage.removeItem('showModal');
+    // FAQ Accordion
+    document.querySelectorAll('.faq-question').forEach(question => {
+      question.addEventListener('click', () => {
+        const item = question.closest('.faq-item');
+        item.classList.toggle('active');
+      });
     });
   </script>
-  
-  <!-- Load remaining application scripts -->
-  <script src="header.js"></script>
-  <script src="auth.js"></script>
-  <script src="views.js"></script>
-  <script src="categories.js"></script>
-  <script src="filters.js"></script>
-  <script src="productivity.js"></script>
-  <script src="real-time.js"></script>
-  <script src="animations.js"></script>
-  <script src="kanban.js"></script>
-  <script src="task-events.js"></script>
-  <script src="import-export.js"></script>
-  <script src="charts.js"></script>
-  <script src="script.js"></script>
-  <script src="view-manager.js"></script>
-</body>
 
+  <!-- Scripts -->
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script src="landing.js"></script>
+</body>
 </html>

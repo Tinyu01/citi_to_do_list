@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow | Guest Mode</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth-styles-2025.css">
+  <link rel="stylesheet" href="sidebar-styles.css">
+  <link rel="stylesheet" href="header-styles.css">
+  <link rel="stylesheet" href="toast-styles.css">
+  <link rel="stylesheet" href="kanban-styles.css">
+  <link rel="stylesheet" href="view-styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- App Config -->
+  <script>
+    window.appConfig = {
+      apiUrl: 'http://localhost:5000',
+      socketUrl: 'http://localhost:5000'
+    };
+    // Set guest mode
+    localStorage.setItem('isGuestMode', 'true');
+  </script>
+</head>
+
+<body>
+
+  <div class="app-container">
+
+    <header>
+      <div class="logo responsive-logo">
+        <i class="fas fa-check-circle"></i>
+        <h1>TaskFlow <span style="font-size: 0.7em; color: #64748b;">(Guest Mode)</span></h1>
+      </div>
+      <div class="header-actions">
+        <div class="theme-selector">
+          <select id="theme-select">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="sunset">Sunset</option>
+            <option value="forest">Forest</option>
+            <option value="ocean">Ocean</option>
+          </select>
+        </div>
+        <div class="data-management-dropdown">
+          <button class="icon-btn" id="data-management-btn">
+            <i class="fas fa-database"></i>
+          </button>
+          <div class="dropdown-content">
+            <button id="export-data" class="dropdown-item">
+              <i class="fas fa-file-export"></i>
+              Export Data
+            </button>
+            <button id="import-data" class="dropdown-item">
+              <i class="fas fa-file-import"></i>
+              Import Data
+            </button>
+          </div>
+        </div>
+        <button id="settings-btn" class="icon-btn">
+          <i class="fas fa-cog"></i>
+        </button>
+        <div class="auth-buttons" id="auth-buttons">
+          <a href="login.html" class="auth-btn glass-effect">
+            <div class="btn-content">
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Login</span>
+            </div>
+            <div class="btn-background"></div>
+          </a>
+          <a href="signup.html" class="auth-btn primary glow-effect">
+            <div class="btn-content">
+              <i class="fas fa-user-plus"></i>
+              <span>Sign Up Free</span>
+            </div>
+            <div class="btn-shine"></div>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="dashboard">
+      <div class="stats-banner">
+        <div class="stat-item">
+          <span id="total-tasks">0</span>
+          <p>Total Tasks</p>
+        </div>
+        <div class="stat-item">
+          <span id="completed-tasks">0</span>
+          <p>Completed</p>
+        </div>
+        <div class="stat-item">
+          <span id="pending-tasks">0</span>
+          <p>Pending</p>
+        </div>
+        <div class="stat-item">
+          <span id="productivity-score">0%</span>
+          <p>Productivity</p>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="task-completion-chart"></canvas>
+        <div class="chart-controls">
+          <button class="chart-btn active" data-chart="weekly">Weekly</button>
+          <button class="chart-btn" data-chart="monthly">Monthly</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <h3>Views</h3>
+          <ul class="sidebar-menu">
+            <li class="sidebar-item active" data-view="list">
+              <button class="view-btn" id="list-view-btn">
+                <i class="fas fa-list"></i>
+                <span>List View</span>
+              </button>
+            </li>
+            <li class="sidebar-item" data-view="kanban">
+              <button class="view-btn" id="kanban-view-btn">
+                <i class="fas fa-columns"></i>
+                <span>Kanban Board</span>
+              </button>
+            </li>
+            <li class="sidebar-item" data-view="calendar">
+              <button class="view-btn" id="calendar-view-btn">
+                <i class="fas fa-calendar"></i>
+                <span>Calendar</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <h3>Categories</h3>
+          <ul class="category-list" id="category-list">
+            <li class="category-item active" data-category="all">
+              <button class="category-btn">
+                <span class="category-color" style="background-color: #6366f1;"></span>
+                <span class="category-name">All Tasks</span>
+                <span class="category-count">0</span>
+              </button>
+            </li>
+            <!-- Dynamic categories will be added here -->
+          </ul>
+          <button id="manage-categories" class="text-btn">
+            <i class="fas fa-plus"></i>
+            <span>Manage Categories</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <div class="top-actions">
+          <div class="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search" placeholder="Search tasks..." aria-label="Search tasks">
+            <button id="voice-search" class="icon-btn" aria-label="Voice search">
+              <i class="fas fa-microphone"></i>
+            </button>
+          </div>
+
+          <div class="filter-container">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+            <button class="filter-btn" data-filter="priority">Priority</button>
+            <button class="filter-btn" data-filter="today">Today</button>
+          </div>
+
+          <div class="sort-container">
+            <label for="sort-by">Sort by:</label>
+            <select id="sort-select">
+              <option value="date-asc">Date (Oldest)</option>
+              <option value="date-desc">Date (Newest)</option>
+              <option value="priority">Priority</option>
+              <option value="alphabetical">Alphabetical</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="view-container">
+          <!-- List View -->
+          <div id="list-view" class="list-view active-view">
+            <ul id="tasks-list" class="tasks-list"></ul>
+          </div>
+
+          <!-- Kanban View -->
+          <div id="kanban-view" class="kanban-view" style="display: none;">
+            <div class="kanban-column" data-status="todo">
+              <h3>To Do</h3>
+              <ul class="kanban-list" id="todo-list"></ul>
+            </div>
+            <div class="kanban-column" data-status="in-progress">
+              <h3>In Progress</h3>
+              <ul class="kanban-list" id="in-progress-list"></ul>
+            </div>
+            <div class="kanban-column" data-status="completed">
+              <h3>Completed</h3>
+              <ul class="kanban-list" id="completed-list"></ul>
+            </div>
+          </div>
+
+          <!-- Calendar View -->
+          <div id="calendar-view" class="calendar-view" style="display: none;">
+            <div class="calendar-header">
+              <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
+              <h3 id="calendar-title">March 2025</h3>
+              <button id="next-month"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+          </div>
+
+          <div class="empty-state" id="empty-state">
+            <img src="./assets/Task.jpg" alt="No tasks" class="empty-image">
+            <p>No tasks found. Add a new task to get started!</p>
+            <button class="primary-btn" id="empty-add-task">
+              <i class="fas fa-plus"></i> Add Your First Task
+            </button>
+          </div>
+        </div>
+
+        <div class="add-task-container">
+          <div class="form-group">
+            <label for="new-task">Title</label>
+            <input type="text" id="new-task" placeholder="Add a new task" required>
+          </div>
+          <div class="form-group">
+            <label for="task-description">Description (Optional)</label>
+            <textarea id="task-description" rows="3" placeholder="Add a description"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="due-date">Due Date</label>
+              <input type="date" id="due-date" min="" required>
+            </div>
+            <div class="form-group">
+              <label for="task-category">Category</label>
+              <select id="task-category" required>
+                <option value="none">Select Category</option>
+                <option value="work">Work</option>
+                <option value="personal">Personal</option>
+                <option value="health">Health</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Priority</label>
+            <input type="hidden" id="task-priority" value="low">
+            <div class="priority-selector">
+              <span class="priority-dot low active" data-priority="low" title="Low Priority"></span>
+              <span class="priority-dot medium" data-priority="medium" title="Medium Priority"></span>
+              <span class="priority-dot high" data-priority="high" title="High Priority"></span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Subtasks (Optional)</label>
+            <ul id="subtasks-list"></ul>
+            <div class="add-subtask">
+              <input type="text" id="new-subtask" placeholder="Add subtask">
+              <button id="add-subtask-btn">Add</button>
+            </div>
+          </div>
+          <button id="add-task">
+            <i class="fas fa-plus"></i>
+            <span>Add Task</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Task Details Modal -->
+    <div class="modal" id="task-details-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Task Details</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="task-edit-form">
+            <div class="form-group">
+              <label for="edit-task-title">Title</label>
+              <input type="text" id="edit-task-title" placeholder="Add a new task" required>
+            </div>
+            <div class="form-group">
+              <label for="edit-task-description">Description (Optional)</label>
+              <textarea id="edit-task-description" rows="3" placeholder="Add a description"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="edit-due-date">Due Date</label>
+                <input type="date" id="edit-due-date" min="" required>
+              </div>
+              <div class="form-group">
+                <label for="edit-task-category">Category</label>
+                <select id="edit-task-category" required>
+                  <option value="none">Select Category</option>
+                  <option value="work">Work</option>
+                  <option value="personal">Personal</option>
+                  <option value="health">Health</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Priority</label>
+              <div class="priority-selector">
+                <span class="priority-dot low" data-priority="low" title="Low Priority"></span>
+                <span class="priority-dot medium" data-priority="medium" title="Medium Priority"></span>
+                <span class="priority-dot high" data-priority="high" title="High Priority"></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Subtasks (Optional)</label>
+              <ul id="subtasks-list"></ul>
+              <div class="add-subtask">
+                <input type="text" id="new-subtask" placeholder="Add subtask">
+                <button id="add-subtask-btn">Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="delete-task" id="delete-task-btn">Delete</button>
+          <button class="save-task" id="save-task-btn">Save Task</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Management Modal -->
+    <div class="modal" id="category-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Manage Categories</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="add-category-form">
+            <div class="form-group">
+              <label for="category-name">Category Name</label>
+              <input type="text" id="category-name" required>
+            </div>
+            <div class="form-group">
+              <label for="category-color">Category Color</label>
+              <input type="color" id="category-color" required>
+            </div>
+            <button type="submit" class="primary-btn">Add Category</button>
+          </form>
+          <div class="categories-list">
+            <h3>Your Categories</h3>
+            <div class="category-items" id="category-items">
+              <!-- Categories will be dynamically added here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-section">
+            <h3>Appearance</h3>
+            <div class="form-group">
+              <label>Theme</label>
+              <div class="theme-selector-container">
+                <div class="theme-option" data-theme="light">
+                  <div class="theme-preview theme-light">
+                    <div class="theme-preview-header"></div>
+                    <div class="theme-preview-body">
+                      <div class="theme-preview-sidebar"></div>
+                      <div class="theme-preview-content">
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                      </div>
+                    </div>
+                    <div class="theme-name">Light</div>
+                  </div>
+                </div>
+                <div class="theme-option" data-theme="dark">
+                  <div class="theme-preview theme-dark">
+                    <div class="theme-preview-header"></div>
+                    <div class="theme-preview-body">
+                      <div class="theme-preview-sidebar"></div>
+                      <div class="theme-preview-content">
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                      </div>
+                    </div>
+                    <div class="theme-name">Dark</div>
+                  </div>
+                </div>
+                <div class="theme-option" data-theme="sunset">
+                  <div class="theme-preview theme-sunset">
+                    <div class="theme-preview-header"></div>
+                    <div class="theme-preview-body">
+                      <div class="theme-preview-sidebar"></div>
+                      <div class="theme-preview-content">
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                      </div>
+                    </div>
+                    <div class="theme-name">Sunset</div>
+                  </div>
+                </div>
+                <div class="theme-option" data-theme="forest">
+                  <div class="theme-preview theme-forest">
+                    <div class="theme-preview-header"></div>
+                    <div class="theme-preview-body">
+                      <div class="theme-preview-sidebar"></div>
+                      <div class="theme-preview-content">
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                      </div>
+                    </div>
+                    <div class="theme-name">Forest</div>
+                  </div>
+                </div>
+                <div class="theme-option" data-theme="ocean">
+                  <div class="theme-preview theme-ocean">
+                    <div class="theme-preview-header"></div>
+                    <div class="theme-preview-body">
+                      <div class="theme-preview-sidebar"></div>
+                      <div class="theme-preview-content">
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                        <div class="theme-preview-item"></div>
+                      </div>
+                    </div>
+                    <div class="theme-name">Ocean</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="font-size">Font Size</label>
+              <div class="slider-container">
+                <input type="range" id="font-size" class="slider" min="12" max="20" value="16">
+                <span class="slider-value" id="font-size-value">16px</span>
+              </div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>Notifications</h3>
+            <div class="form-group">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="enable-notifications">
+                <label for="enable-notifications">Enable Notifications</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="enable-sound">
+                <label for="enable-sound">Sound Alerts</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="enable-reminders">
+                <label for="enable-reminders">Task Reminders</label>
+              </div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>Productivity</h3>
+            <div class="form-group">
+              <label for="pomodoro-duration">Pomodoro Duration</label>
+              <div class="slider-container">
+                <input type="range" id="pomodoro-duration" class="slider" min="5" max="60" value="25">
+                <span class="slider-value" id="pomodoro-duration-value">25 min</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="break-duration">Break Duration</label>
+              <div class="slider-container">
+                <input type="range" id="break-duration" class="slider" min="1" max="30" value="5">
+                <span class="slider-value" id="break-duration-value">5 min</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="auto-break">
+                <label for="auto-break">Auto-start Breaks</label>
+              </div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>Data Management</h3>
+            <div class="form-group button-group">
+              <button class="secondary-btn" id="export-data">
+                <i class="fas fa-download"></i>
+                <span class="btn-text">Export Data</span>
+                <div class="loader" style="display: none;"></div>
+              </button>
+              <button class="secondary-btn" id="import-data">
+                <i class="fas fa-upload"></i>
+                <span class="btn-text">Import Data</span>
+                <div class="loader" style="display: none;"></div>
+              </button>
+            </div>
+            <div class="import-export-status" style="display: none;">
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <p class="status-text"></p>
+            </div>
+            <div class="form-group">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="auto-save">
+                <label for="auto-save">Auto-save Changes</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <button class="danger-btn" id="clear-data">
+                <i class="fas fa-trash-alt"></i> Clear All Data
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="save-settings" id="save-settings-btn">Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+   <footer>
+    <div class="footer-wave">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path fill="rgba(255,255,255,0.1)"
+          d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,202.7C1248,213,1344,171,1392,149.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
+        </path>
+      </svg>
+    </div>
+    <div class="footer-container">
+      <p>TaskFlow &copy; <span id="current-year"></span> | Designed by <a href="https://tinyu01.github.io/citi_portfolio_website/">MASINGITA OTTIS MALULEKE</a> with <i
+          class="fas fa-heart"></i></p>
+      <div class="footer-links">
+        <a href="https://tinyu01.github.io/citi_portfolio_website/about.html">About</a>
+        <a href="#">Privacy Policy</a>
+        <a href="https://tinyu01.github.io/citi_portfolio_website/contact.html">Contact</a>
+      </div>
+      <div class="footer-social">
+        <a href="https://github.com/Tinyu01"><i class="fab fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/thefreelancer201/"><i class="fab fa-linkedin"></i></a>
+        <a href="https://x.com/TheFreelancer20"><i class="fab fa-twitter"></i></a>
+      </div>
+    </div>
+  </footer>
+
+    <!-- Add Task Modal -->
+    <div class="modal" id="add-task-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2><i class="fas fa-plus-circle"></i> Add New Task</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="add-task-form">
+            <div class="form-group">
+              <label for="new-task">Task Title *</label>
+              <input type="text" id="new-task" placeholder="e.g., Finish project report" required autocomplete="off">
+            </div>
+          
+            <div class="form-group">
+              <label for="task-description">Description</label>
+              <textarea id="task-description" rows="3" placeholder="Add more details about your task..."></textarea>
+            </div>
+          
+            <div class="form-row">
+              <div class="form-group">
+                <label for="due-date">Due Date</label>
+                <input type="date" id="due-date">
+              </div>
+              <div class="form-group">
+                <label for="task-category">Category</label>
+                <select id="task-category">
+                  <option value="">Select Category</option>
+                </select>
+              </div>
+            </div>
+          
+            <div class="form-group">
+              <label>Priority Level</label>
+              <div class="priority-selector">
+                <span class="priority-dot low active" data-priority="low" title="Low Priority">
+                  <i class="fas fa-check"></i>
+                </span>
+                <span class="priority-dot medium" data-priority="medium" title="Medium Priority">
+                  <i class="fas fa-check"></i>
+                </span>
+                <span class="priority-dot high" data-priority="high" title="High Priority">
+                  <i class="fas fa-check"></i>
+                </span>
+              </div>
+              <input type="hidden" id="task-priority" value="low">
+            </div>
+          
+            <div class="form-group">
+              <label>Subtasks <span class="optional">(Optional)</span></label>
+              <ul id="subtasks-list" class="subtasks-list"></ul>
+              <div class="add-subtask-input">
+                <input type="text" id="new-subtask" placeholder="Add a subtask and press Enter">
+                <button type="button" id="add-subtask-btn" class="icon-btn">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          
+            <div class="modal-footer">
+              <button type="button" class="secondary-btn close-modal">Cancel</button>
+              <button type="submit" id="add-task" class="primary-btn">
+                <i class="fas fa-check"></i> Add Task
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="fab-add-task" title="Add New Task">
+      <i class="fas fa-plus"></i>
+    </button>
+
+  <!-- Third-party Libraries -->
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="config.js"></script>
+  
+  <!-- Application Scripts -->
+  <script src="guest-storage.js"></script>
+  <script src="header.js"></script>
+  <script src="charts.js"></script>
+  <script src="calendar.js"></script>
+  <script src="guest-app.js"></script>
+  <script>
+    // Set current year in footer
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+  </script>
+</body>
+
+</html>

@@ -101,7 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Listen for data responses
   document.addEventListener('productivityDataResponse', (e) => {
-    renderChart(e.detail.data);
+    const timeRange = document.querySelector('.chart-btn.active')?.dataset.chart || 'weekly';
+    const data = e.detail[timeRange] || e.detail.data;
+    if (data) {
+      renderChart(data);
+    }
   });
 
   // Initialize with weekly view

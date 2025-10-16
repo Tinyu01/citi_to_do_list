@@ -56,6 +56,9 @@ async function handleAuthSuccess(token, user) {
   document.dispatchEvent(new CustomEvent('authStateChanged', {
     detail: { isAuthenticated: true, user }
   }));
+
+  // Redirect to dashboard/main app
+  window.location.href = 'dashboard.html';
 }
 
 // Update UI based on auth state
@@ -239,20 +242,6 @@ function showToast(message, type = 'info') {
     }, 3000);
   }, 100);
 }
-      throw new Error(data.message);
-    }
-
-    currentUser = data.user;
-    authToken = data.token;
-    localStorage.setItem('authToken', data.token);
-    
-    updateAuthUI();
-    closeAllModals();
-    showToast('Account created successfully!');
-  } catch (error) {
-    document.getElementById('signup-error').textContent = error.message;
-  }
-}
 
 async function updateProfile(updates) {
   try {
@@ -402,10 +391,7 @@ async function loginUser(credentials) {
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data.message);
-    }
-
-    currentUser = data.user;
-    authToken = data.token;
+   
     localStorage.setItem('authToken', data.token);
 
     updateAuthUI();
