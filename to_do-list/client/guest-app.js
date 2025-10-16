@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // DOM Elements
   const tasksList = document.getElementById('tasks-list');
+  // Pagination state for list view
+  let listCurrentPage = 1;
+  const TASKS_PER_PAGE = 5;
+  // Pagination container (created dynamically if not present)
+  let listPaginationContainer = null;
   const newTaskInput = document.getElementById('new-task');
   const taskDescription = document.getElementById('task-description');
   const taskCategory = document.getElementById('task-category');
@@ -147,27 +152,71 @@ document.addEventListener('DOMContentLoaded', () => {
     let filteredTasks = filterTasks(tasks);
     filteredTasks = sortTasks(filteredTasks);
 
-    console.log('Filtered tasks:', filteredTasks.length);
+    // Pagination logic
+    const totalTasks = filteredTasks.length;
+    const totalPages = Math.ceil(totalTasks / TASKS_PER_PAGE) || 1;
+    if (listCurrentPage > totalPages) listCurrentPage = totalPages;
+    const startIdx = (listCurrentPage - 1) * TASKS_PER_PAGE;
+    const endIdx = startIdx + TASKS_PER_PAGE;
+    const paginatedTasks = filteredTasks.slice(startIdx, endIdx);
 
     tasksList.innerHTML = '';
 
-    if (filteredTasks.length === 0) {
+    if (totalTasks === 0) {
       console.log('No tasks to display, showing empty state');
       if (emptyState) emptyState.style.display = 'flex';
       tasksList.style.display = 'none';
+      if (listPaginationContainer) listPaginationContainer.innerHTML = '';
       return;
     }
 
     if (emptyState) emptyState.style.display = 'none';
     tasksList.style.display = 'block';
 
-    filteredTasks.forEach(task => {
+    paginatedTasks.forEach(task => {
       console.log('Creating task element for:', task.text);
       const li = createTaskElement(task);
       tasksList.appendChild(li);
     });
 
-    console.log('List view updated, tasks displayed:', filteredTasks.length);
+    // Pagination controls
+    if (!listPaginationContainer) {
+      listPaginationContainer = document.createElement('div');
+      listPaginationContainer.className = 'pagination-container';
+      tasksList.parentNode.appendChild(listPaginationContainer);
+    }
+    renderListPagination(totalPages);
+
+    console.log('List view updated, tasks displayed:', paginatedTasks.length);
+  }
+
+  function renderListPagination(totalPages) {
+    if (!listPaginationContainer) return;
+    if (totalPages <= 1) {
+      listPaginationContainer.innerHTML = '';
+      return;
+    }
+    let html = '';
+    html += `<button class="pagination-btn" ${listCurrentPage === 1 ? 'disabled' : ''} data-page="prev">&laquo;</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button class="pagination-btn${i === listCurrentPage ? ' active' : ''}" data-page="${i}">${i}</button>`;
+    }
+    html += `<button class="pagination-btn" ${listCurrentPage === totalPages ? 'disabled' : ''} data-page="next">&raquo;</button>`;
+    listPaginationContainer.innerHTML = html;
+    // Add event listeners
+    Array.from(listPaginationContainer.querySelectorAll('.pagination-btn')).forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const page = btn.getAttribute('data-page');
+        if (page === 'prev' && listCurrentPage > 1) {
+          listCurrentPage--;
+        } else if (page === 'next' && listCurrentPage < totalPages) {
+          listCurrentPage++;
+        } else if (!isNaN(parseInt(page))) {
+          listCurrentPage = parseInt(page);
+        }
+        updateListView();
+      });
+    });
   }
 
   // Create task element
@@ -305,6 +354,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Update Kanban view
+  // Kanban pagination state
+  let kanbanPages = {
+    todo: 1,
+    inProgress: 1,
+    completed: 1
+  };
+  const KANBAN_TASKS_PER_PAGE = 5;
+  let kanbanPaginationContainers = {
+    todo: null,
+    inProgress: null,
+    completed: null
+  };
+
   function updateKanbanView() {
     const todoList = document.getElementById('todo-list');
     const inProgressList = document.getElementById('in-progress-list');
@@ -312,21 +374,71 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!todoList || !inProgressList || !completedList) return;
 
-    todoList.innerHTML = '';
-    inProgressList.innerHTML = '';
-    completedList.innerHTML = '';
-
+    // Get tasks by status
     let filteredTasks = filterTasks(tasks);
+    const todoTasks = filteredTasks.filter(t => t.status === 'todo');
+    const inProgressTasks = filteredTasks.filter(t => t.status === 'in-progress');
+    const completedTasks = filteredTasks.filter(t => t.status === 'completed');
 
-    filteredTasks.forEach(task => {
-      const taskEl = createKanbanTaskElement(task);
-      if (task.status === 'todo') {
-        todoList.appendChild(taskEl);
-      } else if (task.status === 'in-progress') {
-        inProgressList.appendChild(taskEl);
-      } else if (task.status === 'completed') {
-        completedList.appendChild(taskEl);
+    // Pagination logic for each column
+    function paginate(tasksArr, page) {
+      const totalPages = Math.ceil(tasksArr.length / KANBAN_TASKS_PER_PAGE) || 1;
+      if (page > totalPages) page = totalPages;
+      const startIdx = (page - 1) * KANBAN_TASKS_PER_PAGE;
+      const endIdx = startIdx + KANBAN_TASKS_PER_PAGE;
+      return {
+        paginated: tasksArr.slice(startIdx, endIdx),
+        totalPages
+      };
+    }
+
+    // Render column with pagination
+    function renderKanbanColumn(listEl, tasksArr, pageKey) {
+      listEl.innerHTML = '';
+      const { paginated, totalPages } = paginate(tasksArr, kanbanPages[pageKey]);
+      paginated.forEach(task => {
+        const taskEl = createKanbanTaskElement(task);
+        listEl.appendChild(taskEl);
+      });
+      // Pagination controls
+      if (!kanbanPaginationContainers[pageKey]) {
+        kanbanPaginationContainers[pageKey] = document.createElement('div');
+        kanbanPaginationContainers[pageKey].className = 'pagination-container kanban-pagination';
+        listEl.parentNode.appendChild(kanbanPaginationContainers[pageKey]);
       }
+      renderKanbanPagination(kanbanPaginationContainers[pageKey], pageKey, totalPages);
+    }
+
+    renderKanbanColumn(todoList, todoTasks, 'todo');
+    renderKanbanColumn(inProgressList, inProgressTasks, 'inProgress');
+    renderKanbanColumn(completedList, completedTasks, 'completed');
+  }
+
+  function renderKanbanPagination(container, pageKey, totalPages) {
+    if (totalPages <= 1) {
+      container.innerHTML = '';
+      return;
+    }
+    let html = '';
+    html += `<button class="pagination-btn" ${kanbanPages[pageKey] === 1 ? 'disabled' : ''} data-kanban-page="prev" data-kanban-key="${pageKey}">&laquo;</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button class="pagination-btn${i === kanbanPages[pageKey] ? ' active' : ''}" data-kanban-page="${i}" data-kanban-key="${pageKey}">${i}</button>`;
+    }
+    html += `<button class="pagination-btn" ${kanbanPages[pageKey] === totalPages ? 'disabled' : ''} data-kanban-page="next" data-kanban-key="${pageKey}">&raquo;</button>`;
+    container.innerHTML = html;
+    Array.from(container.querySelectorAll('.pagination-btn')).forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const page = btn.getAttribute('data-kanban-page');
+        const key = btn.getAttribute('data-kanban-key');
+        if (page === 'prev' && kanbanPages[key] > 1) {
+          kanbanPages[key]--;
+        } else if (page === 'next' && kanbanPages[key] < totalPages) {
+          kanbanPages[key]++;
+        } else if (!isNaN(parseInt(page))) {
+          kanbanPages[key] = parseInt(page);
+        }
+        updateKanbanView();
+      });
     });
   }
 
