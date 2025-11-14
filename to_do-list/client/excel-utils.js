@@ -1,7 +1,28 @@
 // Excel import/export utility using SheetJS
 // Requires: https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js
 
-// Export tasks to Excel
+/**
+ * Exports an array of task objects to an Excel file (.xlsx) using SheetJS.
+ *
+ * @function exportTasksToExcel
+ * @param {Array<Object>} tasks - Array of task objects to export. Each task should have:
+ *   - text {string}: Task title
+ *   - description {string}: Task description
+ *   - dueDate {string|Date}: Due date
+ *   - category {Object}: { name: string, color: string }
+ *   - priority {string}: 'low' | 'medium' | 'high'
+ *   - priorityColor {string}: Color code for priority
+ *   - subtasks {Array<Object>}: Subtasks with { text: string }
+ * @param {string} [filename='tasks.xlsx'] - Name of the output Excel file.
+ * @returns {void}
+ * @throws {Error} If file writing fails.
+ * @example
+ * exportTasksToExcel(tasks, 'my-tasks.xlsx');
+ * @notes
+ * - Uses SheetJS (XLSX) library. Must be loaded in the page.
+ * - Adds a 'Summary' sheet with category counts and colors.
+ * - Handles missing fields gracefully.
+ */
 window.exportTasksToExcel = function(tasks, filename = 'tasks.xlsx') {
   const getPriorityColor = (priority) => {
     const p = (priority || '').toString().toLowerCase();
@@ -55,7 +76,25 @@ window.exportTasksToExcel = function(tasks, filename = 'tasks.xlsx') {
     console.warn('Summary sheet generation failed:', e);
   }
   XLSX.writeFile(wb, filename);
- }// Import tasks from Excel
+}
+
+/**
+ * Imports tasks from an Excel file (.xlsx or .xls) using SheetJS and passes them to a callback.
+ *
+ * @function importTasksFromExcel
+ * @param {File} file - Excel file to import (from file input).
+ * @param {function(Array<Object>)} callback - Callback to receive parsed tasks array.
+ * @returns {void}
+ * @throws {Error} If file parsing fails or format is invalid.
+ * @example
+ * importTasksFromExcel(file, function(tasks) {
+ *   // Do something with imported tasks
+ * });
+ * @notes
+ * - Expects columns: Title, Description, Due Date, Category, Category Color, Priority, Priority Color, Subtasks
+ * - Subtasks should be separated by ';' in the Subtasks column.
+ * - Handles both .xlsx and .xls formats.
+ */
 window.importTasksFromExcel = function(file, callback) {
   console.log('Starting import from file:', file.name);
   const reader = new FileReader();

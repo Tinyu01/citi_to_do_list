@@ -217,6 +217,72 @@ Fully responsive layout that works on:
 - 🔔 Push notifications
 - 🌐 Multi-language support
 
+## 📖 Step-by-Step Guide: Importing Tasks from Excel
+
+### Prerequisites
+- Access to TaskFlow dashboard (authenticated user)
+- Excel file (.xlsx or .xls) with tasks formatted as per sample
+
+### Steps
+1. Open `dashboard.html` in your browser and log in.
+2. Click the "Import" button (Excel icon) in the dashboard header.
+3. Select your Excel file (`sample-tasks-10.xlsx` is provided).
+4. Review the imported tasks in the list view.
+5. If you encounter errors, check the file format and required columns.
+
+### Common Issues
+- **File not uploading**: Ensure the file is .xlsx or .xls.
+- **Missing columns**: Use the sample file as a template.
+- **Duplicate tasks**: Imported tasks are added; remove duplicates manually.
+
+### Troubleshooting
+- Refresh the page if tasks do not appear.
+- Check browser console for error messages.
+- Contact support if import repeatedly fails.
+
+## ❓ FAQ: TaskFlow Frequently Asked Questions
+
+### Getting Started
+
+**Q: What is TaskFlow?**  
+A: TaskFlow is a modern web app for managing tasks, tracking productivity, and organizing work with multiple views and themes.
+
+**Q: How do I use TaskFlow as a guest?**  
+A: Open `guest.html` and start adding tasks—no signup required.
+
+**Q: How do I register and log in?**  
+A: Use the signup/login forms in `dashboard.html` for full features and cloud sync.
+
+### Features
+
+**Q: What views are available?**  
+A: List, Kanban, and Calendar views. Switch using the sidebar.
+
+**Q: Can I import/export tasks?**  
+A: Yes, use the Excel import/export buttons in the dashboard.
+
+**Q: How do I change the theme?**  
+A: Use the theme selector in the header. Your choice is saved and synced if logged in.
+
+### Troubleshooting
+
+**Q: My tasks aren’t saving.**  
+A: For guests, tasks are saved in localStorage. For users, ensure you’re logged in and the backend is running.
+
+**Q: I can’t connect to the server.**  
+A: Check your `.env` config and MongoDB service.
+
+**Q: Excel import isn’t working.**  
+A: Use the sample file format and check for required columns.
+
+### Advanced
+
+**Q: Can I use TaskFlow on multiple devices?**  
+A: Yes, log in to sync your tasks across devices.
+
+**Q: How do I contribute?**  
+A: Fork the repo, make changes, and submit a Pull Request.
+
 ## 🤝 Contributing
 Contributions are welcome! Please follow these steps:
 1. Fork the repository

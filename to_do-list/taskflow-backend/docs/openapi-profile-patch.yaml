@@ -1,0 +1,440 @@
+openapi: 3.0.0
+info:
+  title: TaskFlow API
+  version: 1.0.0
+  description: Complete TaskFlow API for authentication and task management
+servers:
+  - url: http://localhost:5000
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      description: Create a new user account
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                name:
+                  type: string
+            example:
+              username: "john_doe"
+              email: "john@example.com"
+              password: "securePassword123"
+              name: "John Doe"
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      summary: Login user
+      description: Authenticate user and get JWT token
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
+            example:
+              username: "john_doe"
+              password: "securePassword123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/profile:
+    patch:
+      summary: Update user profile
+      description: Update name, email, password, and UI preferences for authenticated user
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                preferences:
+                  type: object
+                  properties:
+                    theme:
+                      type: string
+                      enum: [light, dark, sunset, forest, ocean]
+                    defaultView:
+                      type: string
+                      enum: [list, kanban, calendar]
+            example:
+              name: "John Updated"
+              email: "john.updated@example.com"
+              preferences:
+                theme: "dark"
+                defaultView: "kanban"
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid updates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/tasks:
+    get:
+      summary: Get all tasks
+      description: Retrieve all tasks from the database
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: List of tasks retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Create a new task
+      description: Add a new task to the database
+      tags:
+        - Tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskInput'
+            example:
+              text: "Buy groceries"
+              description: "Milk, eggs, bread"
+              completed: false
+              status: "todo"
+              category:
+                name: "Personal"
+                color: "#ffcc00"
+              dueDate: "2024-12-31T23:59:59Z"
+              priority: "medium"
+              subtasks:
+                - text: "Buy milk"
+                  completed: false
+                - text: "Buy eggs"
+                  completed: false
+              guestId: "guest-123"
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/tasks/{id}:
+    put:
+      summary: Update a task
+      description: Update an existing task by ID
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Task ID
+          example: "507f1f77bcf86cd799439011"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskInput'
+            example:
+              text: "Buy groceries - UPDATED"
+              description: "Milk, eggs, bread, butter"
+              completed: true
+              status: "completed"
+              category:
+                name: "Personal"
+                color: "#ffcc00"
+              priority: "high"
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete a task
+      description: Delete a task by ID
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Task ID
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        '200':
+          description: Task deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Task deleted successfully"
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        preferences:
+          type: object
+          properties:
+            theme:
+              type: string
+            defaultView:
+              type: string
+        categories:
+          type: array
+          items:
+            type: object
+
+    AuthResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    Subtask:
+      type: object
+      properties:
+        text:
+          type: string
+        completed:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    Category:
+      type: object
+      properties:
+        name:
+          type: string
+        color:
+          type: string
+
+    TaskInput:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+        description:
+          type: string
+        completed:
+          type: boolean
+        status:
+          type: string
+          enum: [todo, in-progress, completed]
+        category:
+          $ref: '#/components/schemas/Category'
+        dueDate:
+          type: string
+          format: date-time
+        priority:
+          type: string
+          enum: [low, medium, high]
+        user:
+          type: string
+        guestId:
+          type: string
+        subtasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subtask'
+
+    Task:
+      type: object
+      properties:
+        _id:
+          type: string
+        text:
+          type: string
+        description:
+          type: string
+        completed:
+          type: boolean
+        status:
+          type: string
+          enum: [todo, in-progress, completed]
+        category:
+          $ref: '#/components/schemas/Category'
+        dueDate:
+          type: string
+          format: date-time
+        priority:
+          type: string
+          enum: [low, medium, high]
+        user:
+          type: string
+          nullable: true
+        guestId:
+          type: string
+          nullable: true
+        subtasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subtask'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

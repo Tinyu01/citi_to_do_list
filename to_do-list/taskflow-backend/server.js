@@ -9,6 +9,9 @@ const Task = require('./models/Task');
 const User = require('./models/User');
 const authRoutes = require('./routes/auth');
 const { auth, allowGuest } = require('./middleware/auth');
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -28,6 +31,19 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use('/auth', authRoutes);
+const swaggerDocument = YAML.load(path.join(__dirname, 'docs', 'openapi-profile-patch.yaml'));
+
+const swaggerOptions = {
+  customSiteTitle: 'TaskFlow API Docs',
+  customfavIcon: '/assets/favicon.svg',
+  customCss: `
+    .swagger-ui .topbar { background: #6366f1; }
+    .swagger-ui .topbar-wrapper img { content:url('/assets/taskflow-logo.png'); height:40px; }
+    .swagger-ui .topbar-wrapper span { font-size: 1.5rem; font-weight: 600; color: #fff; }
+    .swagger-ui .info h2.title { color: #6366f1; }
+  `
+};
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
 
 // Socket.IO connection handling
 io.on('connection', async (socket) => {
